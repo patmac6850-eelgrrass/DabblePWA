@@ -108,29 +108,37 @@ function displayDice(dice) {
 
             // Drop the die on pointerup
             dieEl.onpointerup = (event) => {
-                document.removeEventListener('pointermove', onPointerMove);
+               document.removeEventListener('pointermove', onPointerMove);
                 dieEl.onpointerup = null;
 
-                // Use the center of the die for the drop detection, not the finger tip
-                const rect = dieEl.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
+                // 1. Get the coordinates of the drop
+                const x = event.clientX;
+                const y = event.clientY;
 
-                dieEl.style.display = 'none'; // Hide to see what's under
-                let elemBelow = document.elementFromPoint(centerX, centerY);
-                dieEl.style.display = 'flex';
+                // 2. Temporarily hide the die and the tray so we can see the grid clearly
+                dieEl.style.visibility = 'hidden';
+                
+                // 3. Find the element at that spot
+                let elemBelow = document.elementFromPoint(x, y);
+                
+                // 4. Show the die again
+                dieEl.style.visibility = 'visible';
 
+                // 5. Check if we actually hit a cell
                 let cell = elemBelow ? elemBelow.closest('.cell') : null;
 
                 if (cell && !cell.hasChildNodes()) {
+                    // SUCCESS: Move to cell
                     cell.appendChild(dieEl);
                     dieEl.style.position = 'static';
-                    boardState[cell.dataset.index] = dieEl.textContent;
+                    const index = cell.dataset.index;
+                    boardState[index] = dieEl.textContent;
                 } else {
-                    // Return to tray
+                    // FAIL: Return to tray
                     trayElement.appendChild(dieEl);
                     dieEl.style.position = 'static';
                 }
+                
                 refreshHighlights();
                 draggedElement = null;
             };
@@ -224,12 +232,12 @@ function refreshHighlights() {
 function checkWinCondition() {
     const diceOnBoard = boardState.filter(x => x !== null).length;
     const greenDice = document.querySelectorAll('.die.valid').length;
+    const connected = isEverythingConnected(); // NEW CHECK
 
-    if (diceOnBoard === 12 && greenDice === 12) {
+    if (diceOnBoard === 12 && greenDice === 12 && connected) {
         clearInterval(timerInterval);
         timerText.classList.add('win-flash');
         
-        // Show our custom modal instead of the alert
         const modal = document.getElementById('victory-modal');
         const scoreText = document.getElementById('final-score');
         
@@ -242,3 +250,45 @@ function closeModal() {
     document.getElementById('victory-modal').classList.add('hidden');
     setupGame(); // Starts a new game automatically
 }
+
+function isEverythingConnected() {
+    const activeIndices = [];
+    boardState.forEach((letter, i) => {
+        if (letter !== null) activeIndices.push(i);
+    });
+
+    if (activeIndices.length === 0) return false;
+
+    const visited = new Set();
+    const queue = [activeIndices[0]];
+
+    while (queue.length > 0) {
+        const current = queue.shift();
+        if (!visited.has(current)) {
+            visited.add(current);
+            
+            // Check neighbors (Up, Down, Left, Right)
+            const neighbors = [
+                current - 10, current + 10, // Vertical
+                current - 1, current + 1    // Horizontal
+            ];
+
+            neighbors.forEach(n => {
+                // Ensure neighbor is on board and has a letter
+                if (n >= 0 && n < 100 && activeIndices.includes(n)) {
+                    // Prevent horizontal wrapping (e.g., cell 9 to 10)
+                    const isSameRow = Math.floor(current / 10) === Math.floor(n / 10);
+                    const isVertical = Math.abs(current - n) === 10;
+                    
+                    if (isVertical || isSameRow) {
+                        queue.push(n);
+                    }
+                }
+            });
+        }
+    }
+
+    // If the number of visited tiles equals our total tiles, they are all connected!
+    return visited.size === activeIndices.length;
+}
+

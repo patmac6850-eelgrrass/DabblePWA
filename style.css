@@ -17,21 +17,22 @@ body {
 /* Responsive container */
 #game-board {
     display: grid;
-    /* Use 'vmin' so it scales based on the smaller screen dimension */
-    grid-template-columns: repeat(10, 8.5vmin); 
-    grid-template-rows: repeat(10, 8.5vmin);
-    gap: 1px; /* Small gap acts as grid lines */
-    background: #555; /* Grid line color */
-    padding: 5px;
+    grid-template-columns: repeat(10, 9vmin); 
+    grid-template-rows: repeat(10, 9vmin);
+    background: #222; /* Darker background */
+    padding: 2px;
     margin: 10px auto;
     width: fit-content;
-    touch-action: none; /* Prevents the whole screen from bouncing */
+    touch-action: none;
+    border: 2px solid #555; /* Outside border */
 }
 
 .cell {
-    width: 8.5vmin;
-    height: 8.5vmin;
-    background: #333; /* Cell interior color */
+    width: 9vmin;
+    height: 9vmin;
+    background: #333;
+    /* This creates the grid lines */
+    border: 0.5px solid #444; 
     display: flex;
     align-items: center;
     justify-content: center;
