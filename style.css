@@ -61,6 +61,8 @@ body {
     cursor: grab;
     user-select: none;
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    touch-action: none; /* Crucial: Prevents scrolling while dragging */
+    user-select: none;
 }
 
 .die.valid {

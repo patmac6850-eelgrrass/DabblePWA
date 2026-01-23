@@ -15,6 +15,8 @@ let dictionary = new Set();
 let boardState = Array(100).fill(null); // 10x10 grid
 let timerInterval;
 let secondsElapsed = 0;
+let draggedElement = null;
+
 
 // Elements
 const boardElement = document.getElementById('game-board');
@@ -77,22 +79,63 @@ function displayDice(dice) {
         const dieEl = document.createElement('div');
         dieEl.className = 'die';
         dieEl.textContent = die.letter;
-        dieEl.draggable = true;
         dieEl.id = `die-${die.id}`;
         
-        // Update the dragstart listener inside your displayDice function
-    dieEl.addEventListener('dragstart', e => {
-    e.dataTransfer.setData('dieId', die.id);
-    e.dataTransfer.setData('letter', die.letter);
-    
-    // NEW: If this die was already on the board, find where it was and clear it
-    const parentCell = dieEl.parentElement;
-    if (parentCell && parentCell.classList.contains('cell')) {
-        const oldIndex = parentCell.dataset.index;
-        boardState[oldIndex] = null; // Clear the "Source of Truth"
-    }
-    });
-        
+        // Use Pointer Events for both Mouse and Touch
+        dieEl.onpointerdown = (e) => {
+            draggedElement = dieEl;
+            dieEl.style.position = 'absolute';
+            dieEl.style.zIndex = 1000;
+            moveAt(e.pageX, e.pageY);
+
+            // Clear old position in state
+            const parent = dieEl.parentElement;
+            if (parent.classList.contains('cell')) {
+                boardState[parent.dataset.index] = null;
+            }
+
+            function moveAt(pageX, pageY) {
+                dieEl.style.left = pageX - dieEl.offsetWidth / 2 + 'px';
+                dieEl.style.top = pageY - dieEl.offsetHeight / 2 + 'px';
+            }
+
+            function onPointerMove(event) {
+                moveAt(event.pageX, event.pageY);
+            }
+
+            // Move the die on pointermove
+            document.addEventListener('pointermove', onPointerMove);
+
+            // Drop the die on pointerup
+            dieEl.onpointerup = (event) => {
+                document.removeEventListener('pointermove', onPointerMove);
+                dieEl.onpointerup = null;
+                
+                // Hide the die momentarily to see what is underneath
+                dieEl.style.display = 'none';
+                let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
+                dieEl.style.display = 'flex';
+
+                if (!elemBelow) return;
+                let cell = elemBelow.closest('.cell');
+                let tray = elemBelow.closest('#dice-tray');
+
+                if (cell && !cell.hasChildNodes()) {
+                    // Drop into Cell
+                    cell.appendChild(dieEl);
+                    dieEl.style.position = 'static';
+                    boardState[cell.dataset.index] = dieEl.textContent;
+                } else {
+                    // Drop back to Tray
+                    trayElement.appendChild(dieEl);
+                    dieEl.style.position = 'static';
+                }
+                refreshHighlights();
+                draggedElement = null;
+            };
+        };
+
+        dieEl.ondragstart = () => false; // Disable default ghost drag
         trayElement.appendChild(dieEl);
     });
 }
@@ -107,27 +150,7 @@ function startTimer() {
     }, 1000);
 }
 
-function handleDrop(e) {
-    e.preventDefault();
-    const cell = e.target.closest('.cell');
-    
-    // 1. Validation: Must be a cell and must be empty
-    if (!cell || cell.hasChildNodes()) return;
 
-    const cellIndex = parseInt(cell.dataset.index);
-    const dieId = e.dataTransfer.getData('dieId');
-    const letter = e.dataTransfer.getData('letter');
-    const dieEl = document.getElementById(`die-${dieId}`);
-
-    // 2. Move the Physical Element
-    cell.appendChild(dieEl);
-
-    // 3. Update the State Array
-    boardState[cellIndex] = letter;
-
-    // 4. Refresh everything
-    refreshHighlights();
-}
 // Initialize
 rollButton.addEventListener('click', setupGame);
 loadDictionary();
