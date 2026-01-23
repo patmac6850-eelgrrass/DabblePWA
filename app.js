@@ -110,30 +110,31 @@ function displayDice(dice) {
             dieEl.onpointerup = (event) => {
                 document.removeEventListener('pointermove', onPointerMove);
                 dieEl.onpointerup = null;
-                
-                // Hide the die momentarily to see what is underneath
-                dieEl.style.display = 'none';
-                let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
+
+                // Use the center of the die for the drop detection, not the finger tip
+                const rect = dieEl.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                dieEl.style.display = 'none'; // Hide to see what's under
+                let elemBelow = document.elementFromPoint(centerX, centerY);
                 dieEl.style.display = 'flex';
 
-                if (!elemBelow) return;
-                let cell = elemBelow.closest('.cell');
-                let tray = elemBelow.closest('#dice-tray');
+                let cell = elemBelow ? elemBelow.closest('.cell') : null;
 
                 if (cell && !cell.hasChildNodes()) {
-                    // Drop into Cell
                     cell.appendChild(dieEl);
                     dieEl.style.position = 'static';
                     boardState[cell.dataset.index] = dieEl.textContent;
                 } else {
-                    // Drop back to Tray
+                    // Return to tray
                     trayElement.appendChild(dieEl);
                     dieEl.style.position = 'static';
                 }
                 refreshHighlights();
                 draggedElement = null;
             };
-        };
+                    };
 
         dieEl.ondragstart = () => false; // Disable default ghost drag
         trayElement.appendChild(dieEl);

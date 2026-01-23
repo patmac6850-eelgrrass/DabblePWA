@@ -14,28 +14,37 @@ body {
     padding: 20px;
 }
 
+/* Responsive container */
 #game-board {
     display: grid;
-    grid-template-columns: repeat(10, 40px); /* Lock columns to exactly 40px */
-    grid-template-rows: repeat(10, 40px);    /* Lock rows to exactly 40px */
-    gap: 4px;
-    background: #333;
-    padding: 8px;
-    border-radius: 4px;
-    margin: 0 auto 20px auto; /* Centers the board */
-    width: fit-content;       /* Shrinks the container to fit the cells */
-    height: fit-content;
+    /* Use 'vmin' so it scales based on the smaller screen dimension */
+    grid-template-columns: repeat(10, 8.5vmin); 
+    grid-template-rows: repeat(10, 8.5vmin);
+    gap: 1px; /* Small gap acts as grid lines */
+    background: #555; /* Grid line color */
+    padding: 5px;
+    margin: 10px auto;
+    width: fit-content;
+    touch-action: none; /* Prevents the whole screen from bouncing */
 }
 
 .cell {
-    width: 40px;
-    height: 40px;
-    background: #444;
-    border-radius: 2px;
+    width: 8.5vmin;
+    height: 8.5vmin;
+    background: #333; /* Cell interior color */
     display: flex;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box; /* Ensures padding/border doesn't add to width */
+    box-sizing: border-box;
+}
+
+.die {
+    width: 8vmin;
+    height: 8vmin;
+    /* ... keep your existing colors/fonts ... */
+    position: relative; 
+    touch-action: none;
+    z-index: 10;
 }
 
 #dice-tray {
@@ -45,24 +54,6 @@ body {
     justify-content: center;
     min-height: 50px;
     margin-bottom: 20px;
-}
-
-.die {
-    width: 36px;  /* Slightly smaller than the cell for a nice fit */
-    height: 36px;
-    background: var(--tile-color);
-    color: var(--text-dark);
-    font-weight: bold;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    cursor: grab;
-    user-select: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    touch-action: none; /* Crucial: Prevents scrolling while dragging */
-    user-select: none;
 }
 
 .die.valid {
