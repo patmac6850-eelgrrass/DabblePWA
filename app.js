@@ -31,11 +31,6 @@ function createBoard() {
         const cell = document.createElement('div');
         cell.className = 'cell';
         cell.dataset.index = i;
-        
-        // Drag & Drop Listeners
-        cell.addEventListener('dragover', e => e.preventDefault());
-        cell.addEventListener('drop', handleDrop);
-        
         boardElement.appendChild(cell);
     }
 }
@@ -80,71 +75,57 @@ function displayDice(dice) {
         dieEl.className = 'die';
         dieEl.textContent = die.letter;
         dieEl.id = `die-${die.id}`;
-        
-        // Use Pointer Events for both Mouse and Touch
+        dieEl.style.position = 'static'; // Start in the tray
+
         dieEl.onpointerdown = (e) => {
+            dieEl.setPointerCapture(e.pointerId); // Keeps touch locked to the die
             draggedElement = dieEl;
-            dieEl.style.position = 'absolute';
+            
+            // Move die to absolute for dragging
+            dieEl.style.position = 'fixed'; 
             dieEl.style.zIndex = 1000;
-            moveAt(e.pageX, e.pageY);
 
-            // Clear old position in state
-            const parent = dieEl.parentElement;
-            if (parent.classList.contains('cell')) {
-                boardState[parent.dataset.index] = null;
-            }
+            const onPointerMove = (ev) => {
+                dieEl.style.left = ev.clientX - dieEl.offsetWidth / 2 + 'px';
+                dieEl.style.top = ev.clientY - dieEl.offsetHeight / 2 + 'px';
+            };
 
-            function moveAt(pageX, pageY) {
-                dieEl.style.left = pageX - dieEl.offsetWidth / 2 + 'px';
-                dieEl.style.top = pageY - dieEl.offsetHeight / 2 + 'px';
-            }
+            const onPointerUp = (ev) => {
+                dieEl.releasePointerCapture(ev.pointerId);
+                document.removeEventListener('pointermove', onPointerMove);
+                document.removeEventListener('pointerup', onPointerUp);
 
-            function onPointerMove(event) {
-                moveAt(event.pageX, event.pageY);
-            }
+                // Clear state if it was in a cell
+                if (dieEl.parentElement.classList.contains('cell')) {
+                    boardState[dieEl.parentElement.dataset.index] = null;
+                }
 
-            // Move the die on pointermove
-            document.addEventListener('pointermove', onPointerMove);
-
-            // Drop the die on pointerup
-            dieEl.onpointerup = (event) => {
-               document.removeEventListener('pointermove', onPointerMove);
-                dieEl.onpointerup = null;
-
-                // 1. Get the coordinates of the drop
-                const x = event.clientX;
-                const y = event.clientY;
-
-                // 2. Temporarily hide the die and the tray so we can see the grid clearly
                 dieEl.style.visibility = 'hidden';
-                
-                // 3. Find the element at that spot
-                let elemBelow = document.elementFromPoint(x, y);
-                
-                // 4. Show the die again
+                let elemBelow = document.elementFromPoint(ev.clientX, ev.clientY);
                 dieEl.style.visibility = 'visible';
 
-                // 5. Check if we actually hit a cell
                 let cell = elemBelow ? elemBelow.closest('.cell') : null;
+                let tray = elemBelow ? elemBelow.closest('#dice-tray') : null;
 
                 if (cell && !cell.hasChildNodes()) {
-                    // SUCCESS: Move to cell
                     cell.appendChild(dieEl);
                     dieEl.style.position = 'static';
-                    const index = cell.dataset.index;
-                    boardState[index] = dieEl.textContent;
+                    boardState[cell.dataset.index] = dieEl.textContent;
                 } else {
-                    // FAIL: Return to tray
                     trayElement.appendChild(dieEl);
                     dieEl.style.position = 'static';
                 }
-                
                 refreshHighlights();
-                draggedElement = null;
             };
-                    };
 
-        dieEl.ondragstart = () => false; // Disable default ghost drag
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerup', onPointerUp);
+            
+            // Trigger first move immediately
+            onPointerMove(e);
+        };
+
+        dieEl.ondragstart = () => false;
         trayElement.appendChild(dieEl);
     });
 }

@@ -17,35 +17,50 @@ body {
 /* Responsive container */
 #game-board {
     display: grid;
-    grid-template-columns: repeat(10, 9vmin); 
-    grid-template-rows: repeat(10, 9vmin);
-    background: #222; /* Darker background */
-    padding: 2px;
+    grid-template-columns: repeat(10, 9vw); 
+    grid-template-rows: repeat(10, 9vw);
+    background: #444; /* This acts as the grid line color */
+    gap: 1px; /* The gap creates the lines */
+    padding: 1px;
     margin: 10px auto;
     width: fit-content;
     touch-action: none;
-    border: 2px solid #555; /* Outside border */
 }
 
 .cell {
-    width: 9vmin;
-    height: 9vmin;
-    background: #333;
-    /* This creates the grid lines */
-    border: 0.5px solid #444; 
+    width: 9vw;
+    height: 9vw;
+    background: #222; /* Dark cell interiors */
     display: flex;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
 }
 
+/* For PC: Lock the size so it's not giant */
+@media (min-width: 600px) {
+    #game-board {
+        grid-template-columns: repeat(10, 50px);
+        grid-template-rows: repeat(10, 50px);
+    }
+    .cell { width: 50px; height: 50px; }
+    .die { width: 45px; height: 45px; font-size: 24px; }
+}
+
 .die {
-    width: 8vmin;
-    height: 8vmin;
-    /* ... keep your existing colors/fonts ... */
-    position: relative; 
+    width: 8vw;
+    height: 8vw;
+    background-color: white;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 5vw;
+    border-radius: 4px;
+    position: absolute; /* Needed for the dragging logic */
     touch-action: none;
-    z-index: 10;
+    z-index: 100;
 }
 
 #dice-tray {
