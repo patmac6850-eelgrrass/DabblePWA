@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dabble PWA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Dabble</h1>
+            <div id="timer">Time: 00:00</div>
+        </header>
+
+        <div id="game-board"></div>
+
+        <div id="dice-tray"></div>
+
+        <div class="controls">
+            <button id="roll-button">New Game / Roll</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+
+    <div id="victory-modal" class="hidden">
+    <div class="modal-content">
+        <h2>DABBLE!</h2>
+        <p id="final-score"></p>
+        <button onclick="closeModal()">Play Again</button>
+    </div>
+</div>
+</body>
+</html>
