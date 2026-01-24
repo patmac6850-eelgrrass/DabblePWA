@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dabble PWA</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div id="game-container">
         <header>
@@ -19,17 +21,29 @@
 
         <div class="controls">
             <button id="roll-button">New Game / Roll</button>
+
+            <h1> </h1>
+            <div class="settings">
+                <label class="switch">
+                    <input type="checkbox" id="min-three-toggle">
+                    <span class="slider"></span>
+                    3-Letter Minimum
+                </label>
+            </div>
+
+
         </div>
     </div>
 
     <script src="app.js"></script>
 
     <div id="victory-modal" class="hidden">
-    <div class="modal-content">
-        <h2>DABBLE!</h2>
-        <p id="final-score"></p>
-        <button onclick="closeModal()">Play Again</button>
+        <div class="modal-content">
+            <h2>DABBLE!</h2>
+            <p id="final-score"></p>
+            <button onclick="closeModal()">Play Again</button>
+        </div>
     </div>
-</div>
 </body>
+
 </html>
