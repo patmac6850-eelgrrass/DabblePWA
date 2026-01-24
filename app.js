@@ -9,7 +9,17 @@ const diceConfigs = [
 //    "WHHTTP", "CCBTJD", "CCMTTS", "OIINNY", "AEIOUU", "AAEEOO"
 //];
 
+let minWordLength = localStorage.getItem('minWordLength') ? parseInt(localStorage.getItem('minWordLength')) : 2;
 
+// Set the checkbox state on load
+document.getElementById('min-three-toggle').checked = (minWordLength === 3);
+
+// Listener for the toggle
+document.getElementById('min-three-toggle').addEventListener('change', (e) => {
+    minWordLength = e.target.checked ? 3 : 2;
+    localStorage.setItem('minWordLength', minWordLength);
+    refreshHighlights(); // Immediately update the board
+});
 
 let dictionary = new Set();
 let boardState = Array(100).fill(null); // 10x10 grid
@@ -55,7 +65,7 @@ function setupGame() {
     boardState = Array(100).fill(null);
     secondsElapsed = 0;
     clearInterval(timerInterval);
-    
+
     // Create Dice
     const rolledDice = diceConfigs.map((config, id) => ({
         id: id,
@@ -80,9 +90,9 @@ function displayDice(dice) {
         dieEl.onpointerdown = (e) => {
             dieEl.setPointerCapture(e.pointerId); // Keeps touch locked to the die
             draggedElement = dieEl;
-            
+
             // Move die to absolute for dragging
-            dieEl.style.position = 'fixed'; 
+            dieEl.style.position = 'fixed';
             dieEl.style.zIndex = 1000;
 
             const onPointerMove = (ev) => {
@@ -120,7 +130,7 @@ function displayDice(dice) {
 
             document.addEventListener('pointermove', onPointerMove);
             document.addEventListener('pointerup', onPointerUp);
-            
+
             // Trigger first move immediately
             onPointerMove(e);
         };
@@ -151,7 +161,7 @@ trayElement.addEventListener('drop', e => {
     e.preventDefault();
     const dieId = e.dataTransfer.getData('dieId');
     const dieEl = document.getElementById(`die-${dieId}`);
-    
+
     // If it was on the board, it's already cleared by the 'dragstart' logic above
     trayElement.appendChild(dieEl);
     refreshHighlights(); // Recalculate now that a letter is gone
@@ -159,51 +169,64 @@ trayElement.addEventListener('drop', e => {
 
 
 function refreshHighlights() {
-    // 1. Reset all tiles to default color
     const allDiceElements = document.querySelectorAll('.die');
     allDiceElements.forEach(d => d.classList.remove('valid'));
 
-    const validCells = new Set();
+    // Sets to track which cells are part of a valid horizontal/vertical word
+    const validHorizontal = new Set();
+    const validVertical = new Set();
 
-    // Helper to check a sequence of indices (a row or a col)
-    const checkLine = (indices) => {
+    // Sets to track which cells HAVE a neighbor (to detect multi-letter sequences)
+    const hasHorizontalNeighbor = new Set();
+    const hasVerticalNeighbor = new Set();
+
+    // Helper to scan lines
+    const scan = (indices, isHorizontal) => {
         let text = indices.map(i => boardState[i] || ' ').join('');
-        
-        // Find chunks of letters (words)
-        // regex /([A-Z]{2,})/g finds sequences of 2 or more letters
+        if (text.trim().length < minWordLength) return;
+
+        // Use the current minWordLength for the regex
+        const regexStr = `([A-Z]{${minWordLength},})`;
+        const wordRegex = new RegExp(regexStr, 'g');
         let match;
-        const wordRegex = /([A-Z]{2,})/g;
-        
+
         while ((match = wordRegex.exec(text)) !== null) {
             const word = match[0];
             const startIdx = match.index;
-            
-            if (dictionary.has(word)) {
-                // Mark these specific indices as part of a valid word
-                for (let i = 0; i < word.length; i++) {
-                    validCells.add(indices[startIdx + i]);
+            const isWordValid = dictionary.has(word);
+
+            for (let i = 0; i < word.length; i++) {
+                const boardIdx = indices[startIdx + i];
+                if (isHorizontal) {
+                    hasHorizontalNeighbor.add(boardIdx);
+                    if (isWordValid) validHorizontal.add(boardIdx);
+                } else {
+                    hasVerticalNeighbor.add(boardIdx);
+                    if (isWordValid) validVertical.add(boardIdx);
                 }
             }
         }
     };
 
-    // 2. Scan all Rows
-    for (let r = 0; r < 10; r++) {
-        const rowIndices = Array.from({length: 10}, (_, i) => r * 10 + i);
-        checkLine(rowIndices);
+
+    // Scan all rows and columns
+    for (let i = 0; i < 10; i++) {
+        scan(Array.from({ length: 10 }, (_, j) => i * 10 + j), true);  // Rows
+        scan(Array.from({ length: 10 }, (_, j) => j * 10 + i), false); // Cols
     }
 
-    // 3. Scan all Columns
-    for (let c = 0; c < 10; c++) {
-        const colIndices = Array.from({length: 10}, (_, i) => i * 10 + c);
-        checkLine(colIndices);
-    }
+    // APPLY COLORS: A tile is only valid if it's not part of an INVALID sequence
+    boardState.forEach((letter, i) => {
+        if (!letter) return;
 
-    // 4. Apply the 'valid' class to the dice in those cells
-    validCells.forEach(index => {
-        const cell = boardElement.children[index];
-        if (cell.firstChild) {
-            cell.firstChild.classList.add('valid');
+        const hInvalid = hasHorizontalNeighbor.has(i) && !validHorizontal.has(i);
+        const vInvalid = hasVerticalNeighbor.has(i) && !validVertical.has(i);
+
+        // If it's part of a sequence in EITHER direction, 
+        // it must be valid in ALL directions it participates in.
+        if (!hInvalid && !vInvalid && (validHorizontal.has(i) || validVertical.has(i))) {
+            const cell = boardElement.children[i];
+            if (cell && cell.firstChild) cell.firstChild.classList.add('valid');
         }
     });
 
@@ -218,10 +241,10 @@ function checkWinCondition() {
     if (diceOnBoard === 12 && greenDice === 12 && connected) {
         clearInterval(timerInterval);
         timerText.classList.add('win-flash');
-        
+
         const modal = document.getElementById('victory-modal');
         const scoreText = document.getElementById('final-score');
-        
+
         scoreText.textContent = `Final Time: ${timerText.textContent}`;
         modal.classList.remove('hidden');
     }
@@ -247,7 +270,7 @@ function isEverythingConnected() {
         const current = queue.shift();
         if (!visited.has(current)) {
             visited.add(current);
-            
+
             // Check neighbors (Up, Down, Left, Right)
             const neighbors = [
                 current - 10, current + 10, // Vertical
@@ -260,7 +283,7 @@ function isEverythingConnected() {
                     // Prevent horizontal wrapping (e.g., cell 9 to 10)
                     const isSameRow = Math.floor(current / 10) === Math.floor(n / 10);
                     const isVertical = Math.abs(current - n) === 10;
-                    
+
                     if (isVertical || isSameRow) {
                         queue.push(n);
                     }
