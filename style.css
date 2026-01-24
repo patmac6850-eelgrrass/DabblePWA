@@ -37,26 +37,7 @@ body {
     box-sizing: border-box;
 }
 
-/* For PC: Lock the size so it's not giant */
-@media (min-width: 600px) {
-    #game-board {
-        grid-template-columns: repeat(10, 50px);
-        grid-template-rows: repeat(10, 50px);
-    }
-    .cell { width: 50px; height: 50px; }
 
-    .die { 
-        width: 45px;      /* Fixed size for desktop */
-        height: 45px;     /* Fixed size for desktop */
-        font-size: 24px;  /* Fixed font size for desktop */
-        position: relative; /* This helps them sit nicely in the tray when not being dragged */
-    }
-
-    #dice-tray {
-        min-height: 60px; /* Ensure the tray is tall enough for the 45px dice */
-    }
-
-}
 
 .die {
     width: 7vw;
@@ -81,6 +62,27 @@ body {
     justify-content: center;
     min-height: 50px;
     margin-bottom: 20px;
+}
+
+/* For PC: Lock the size so it's not giant */
+@media (min-width: 600px) {
+    #game-board {
+        grid-template-columns: repeat(10, 50px);
+        grid-template-rows: repeat(10, 50px);
+    }
+    .cell { width: 50px; height: 50px; }
+
+    .die { 
+        width: 45px;      /* Fixed size for desktop */
+        height: 45px;     /* Fixed size for desktop */
+        font-size: 24px;  /* Fixed font size for desktop */
+        position: relative; /* This helps them sit nicely in the tray when not being dragged */
+    }
+
+    #dice-tray {
+        min-height: 60px; /* Ensure the tray is tall enough for the 45px dice */
+    }
+
 }
 
 .die.valid {
