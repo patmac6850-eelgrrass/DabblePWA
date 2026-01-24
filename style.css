@@ -44,7 +44,18 @@ body {
         grid-template-rows: repeat(10, 50px);
     }
     .cell { width: 50px; height: 50px; }
-    .die { width: 45px; height: 45px; font-size: 24px; }
+
+    .die { 
+        width: 45px;      /* Fixed size for desktop */
+        height: 45px;     /* Fixed size for desktop */
+        font-size: 24px;  /* Fixed font size for desktop */
+        position: relative; /* This helps them sit nicely in the tray when not being dragged */
+    }
+
+    #dice-tray {
+        min-height: 60px; /* Ensure the tray is tall enough for the 45px dice */
+    }
+
 }
 
 .die {
