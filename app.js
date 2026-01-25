@@ -66,6 +66,9 @@ function setupGame() {
     secondsElapsed = 0;
     clearInterval(timerInterval);
 
+    //  Hide the banner when starting a new game
+    document.getElementById('victory-banner').classList.add('hidden');
+
     // Create Dice
     const rolledDice = diceConfigs.map((config, id) => ({
         id: id,
@@ -146,7 +149,7 @@ function startTimer() {
         secondsElapsed++;
         const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
         const secs = (secondsElapsed % 60).toString().padStart(2, '0');
-        timerText.textContent = `Time: ${mins}:${secs}`;
+        timerText.textContent = `  ${mins}:${secs}`;
     }, 1000);
 }
 
@@ -242,16 +245,20 @@ function checkWinCondition() {
         clearInterval(timerInterval);
         timerText.classList.add('win-flash');
 
-        const modal = document.getElementById('victory-modal');
+        // CHANGE THIS LINE to use victory-banner
+        const banner = document.getElementById('victory-banner');
         const scoreText = document.getElementById('final-score');
 
-        scoreText.textContent = `Final Time: ${timerText.textContent}`;
-        modal.classList.remove('hidden');
+        if (banner) {
+            scoreText.textContent = ` ${timerText.textContent}`;
+            banner.classList.remove('hidden');
+        }
     }
 }
 
 function closeModal() {
-    document.getElementById('victory-modal').classList.add('hidden');
+    const banner = document.getElementById('victory-banner');
+    if (banner) banner.classList.add('hidden');
     setupGame(); // Starts a new game automatically
 }
 
@@ -295,4 +302,16 @@ function isEverythingConnected() {
     // If the number of visited tiles equals our total tiles, they are all connected!
     return visited.size === activeIndices.length;
 }
+
+// Type 'showWin()' in your browser console to test this!
+function showWin() {
+    const banner = document.getElementById('victory-banner');
+    if (banner) {
+        banner.classList.remove('hidden');
+    } else {
+        console.log("Error: Could not find victory-banner ID");
+    }
+}
+// Make it accessible to the console
+window.showWin = showWin;
 

@@ -15,6 +15,13 @@
             <div id="timer">Time: 00:00</div>
         </header>
 
+        <div id="victory-banner" class="hidden">
+            <div class="banner-content">
+                <h2>Dabble Win! <span id="final-score"></span></h2>
+            </div>
+        </div>
+
+
         <div id="game-board"></div>
 
         <div id="dice-tray"></div>
@@ -37,13 +44,7 @@
 
     <script src="app.js"></script>
 
-    <div id="victory-modal" class="hidden">
-        <div class="modal-content">
-            <h2>DABBLE!</h2>
-            <p id="final-score"></p>
-            <button onclick="closeModal()">Play Again</button>
-        </div>
-    </div>
+   
 </body>
 
 </html>
