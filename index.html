@@ -18,10 +18,12 @@
             <h1>Dabble</h1>
             <div class="header-container">
                 <div id="timer">00:00</div>
-                <div id="stats">
-                    P: <span id="games-played">0</span> | 
-                    W: <span id="games-won">0</span> | 
-                    <span id="win-percent">0</span>%
+               <div id="stats">
+                    <span class="stat-item">PLAYED <span id="games-played">0</span></span>
+                    <span class="stat-dot">&bull;</span>
+                    <span class="stat-item">WON <span id="games-won">0</span></span>
+                    <span class="stat-dot">&bull;</span>
+                    <span class="stat-item"><span id="win-percent">0</span>% WIN</span>
                 </div>
             </div>
         </header>
@@ -55,6 +57,17 @@
 
 
         </div>
+    </div>
+
+    <div id="custom-confirm-modal" class="modal hidden">
+    <div class="modal-content">
+        <h3>Reset All Stats?</h3>
+        <p>This will permanently delete your win history and best times.</p>
+        <div class="modal-buttons">
+            <button id="confirm-cancel">Cancel</button>
+            <button id="confirm-delete">Delete Everything</button>
+        </div>
+    </div>
     </div>
 
     <script src="app.js"></script>

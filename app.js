@@ -381,20 +381,24 @@ function closeModal() {
     setupGame(); // Starts a new game automatically
 }
 
-function confirmReset() {
-    const doubleCheck = confirm("Are you sure you want to delete your stats? This cannot be undone.");
-    
-    if (doubleCheck) {
-        // Clear the specific keys we used
+window.confirmReset = function() {
+    const modal = document.getElementById('custom-confirm-modal');
+    modal.classList.remove('hidden');
+
+    // Handle Cancel
+    document.getElementById('confirm-cancel').onclick = () => {
+        modal.classList.add('hidden');
+    };
+
+    // Handle Delete
+    document.getElementById('confirm-delete').onclick = () => {
         localStorage.removeItem('dabble_played');
         localStorage.removeItem('dabble_won');
-        
-        // Refresh the UI to show 0s
+        localStorage.removeItem('dabble_best');
         updateStatsUI();
-        
-        alert("Stats have been reset.");
-    }
-}
+        modal.classList.add('hidden');
+    };
+};
 
 function isEverythingConnected() {
     const activeIndices = [];
