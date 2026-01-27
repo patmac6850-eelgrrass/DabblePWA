@@ -231,3 +231,20 @@ body {
     color: white;
     border-color: white;
 }
+
+#game-board, #dice-tray, .die {
+    /* Prevents the browser from handling touch for scrolling */
+    touch-action: none; 
+    
+    /* Prevents the 'magnifying glass' or text selection on long-press */
+    -webkit-user-select: none; 
+    user-select: none;
+}
+
+body {
+    /* Prevents the 'elastic' bounce effect at the top/bottom of the page */
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
