@@ -45,6 +45,47 @@ function createBoard() {
     }
 }
 
+function updateStatsUI() {
+    const played = parseInt(localStorage.getItem('dabble_played') || 0);
+    const won = parseInt(localStorage.getItem('dabble_won') || 0);
+    
+    // Calculate percentage: (Won / Played) * 100
+    // Use Math.round() to get that clean integer
+    let percent = 0;
+    if (played > 0) {
+        percent = Math.round((won / played) * 100);
+    }
+
+    document.getElementById('games-played').textContent = played;
+    document.getElementById('games-won').textContent = won;
+    document.getElementById('win-percent').textContent = percent;
+}
+
+
+// Call this when a New Game starts
+// Update your record functions to call this UI update
+function recordGamePlayed() {
+    let played = parseInt(localStorage.getItem('dabble_played') || 0);
+    localStorage.setItem('dabble_played', played + 1);
+    updateStatsUI();
+}
+
+// Update stats
+function recordGameWon() {
+    let won = parseInt(localStorage.getItem('dabble_won') || 0);
+    localStorage.setItem('dabble_won', won + 1);
+    updateStatsUI(); // This forces the % to recalculate with the new Win
+}
+
+// Run this when the page first loads
+function loadStats() {
+    const played = localStorage.getItem('dabble_played') || 0;
+    const won = localStorage.getItem('dabble_won') || 0;
+    
+    document.getElementById('games-played').textContent = played;
+    document.getElementById('games-won').textContent = won;
+}
+
 // 2. Load Dictionary (The Fetch API)
 async function loadDictionary() {
     try {
@@ -66,7 +107,12 @@ function setupGame() {
     secondsElapsed = 0;
     clearInterval(timerInterval);
 
-    //  Hide the banner when starting a new game
+    // Remove the "Lock" from the previous game
+    const gameBoard = document.getElementById('game-board');
+    const controls = document.getElementById('controls');
+    if(gameBoard) gameBoard.classList.remove('ui-disabled');
+    if(controls) controls.classList.remove('ui-disabled');
+
     document.getElementById('victory-banner').classList.add('hidden');
 
     // Create Dice
@@ -75,11 +121,15 @@ function setupGame() {
         letter: config[Math.floor(Math.random() * config.length)]
     }));
 
-    // Shuffle and display in tray
     displayDice(rolledDice.sort(() => Math.random() - 0.5));
+    
+    // LOGIC ORDER:
+    recordGamePlayed(); // This increments 'Played' AND updates the UI automatically
+    
     createBoard();
     startTimer();
 }
+
 
 function displayDice(dice) {
     trayElement.innerHTML = '';
@@ -91,6 +141,9 @@ function displayDice(dice) {
         dieEl.style.position = 'static'; // Start in the tray
 
         dieEl.onpointerdown = (e) => {
+            const startX = e.clientX;
+            const startY = e.clientY;
+            let hasMoved = false;
             dieEl.setPointerCapture(e.pointerId); // Keeps touch locked to the die
             draggedElement = dieEl;
 
@@ -99,11 +152,22 @@ function displayDice(dice) {
             dieEl.style.zIndex = 1000;
 
             const onPointerMove = (ev) => {
+                // If moved more than 5px, it's a real drag
+                if (Math.abs(ev.clientX - startX) > 5 || Math.abs(ev.clientY - startY) > 5) {
+                    hasMoved = true;
+                }
                 dieEl.style.left = ev.clientX - dieEl.offsetWidth / 2 + 'px';
                 dieEl.style.top = ev.clientY - dieEl.offsetHeight / 2 + 'px';
-            };
+                };
 
             const onPointerUp = (ev) => {
+                // NEW: If they just tapped it (didn't move), do nothing and stay put
+                if (!hasMoved && dieEl.parentElement.classList.contains('cell')) {
+                    dieEl.style.position = 'static'; // Snap back into its current cell
+                    document.removeEventListener('pointermove', onPointerMove);
+                    document.removeEventListener('pointerup', onPointerUp);
+                return; 
+        }
                 dieEl.releasePointerCapture(ev.pointerId);
                 document.removeEventListener('pointermove', onPointerMove);
                 document.removeEventListener('pointerup', onPointerUp);
@@ -118,15 +182,26 @@ function displayDice(dice) {
                 dieEl.style.visibility = 'visible';
 
                 let cell = elemBelow ? elemBelow.closest('.cell') : null;
-                let tray = elemBelow ? elemBelow.closest('#dice-tray') : null;
+                if (cell) {
+                    let targetIndex = parseInt(cell.dataset.index);
+                    
+                    // If the cell is occupied, find the closest empty one
+                    if (boardState[targetIndex] !== null) {
+                        targetIndex = findNearestEmpty(targetIndex);
+                    }
 
-                if (cell && !cell.hasChildNodes()) {
-                    cell.appendChild(dieEl);
-                    dieEl.style.position = 'static';
-                    boardState[cell.dataset.index] = dieEl.textContent;
+                    // If we found a spot (on the board), place it
+                    if (targetIndex !== -1) {
+                        const finalCell = boardElement.children[targetIndex];
+                        finalCell.appendChild(dieEl);
+                        dieEl.style.position = 'static';
+                        boardState[targetIndex] = dieEl.textContent;
+                    } else {
+                        // Only return to tray if the WHOLE board is full (unlikely)
+                        returnToTray(dieEl);
+                    }
                 } else {
-                    trayElement.appendChild(dieEl);
-                    dieEl.style.position = 'static';
+                    returnToTray(dieEl);
                 }
                 refreshHighlights();
             };
@@ -142,6 +217,36 @@ function displayDice(dice) {
         trayElement.appendChild(dieEl);
     });
 }
+
+function findNearestEmpty(startIndex) {
+    // Check neighbors in expanding rings (Up, Down, Left, Right)
+    // We search the 100-cell board for the closest null in boardState
+    let bestDist = Infinity;
+    let bestIdx = -1;
+
+    boardState.forEach((val, i) => {
+        if (val === null) {
+            // Calculate Manhattan distance (grid distance)
+            const x1 = startIndex % 10;
+            const y1 = Math.floor(startIndex / 10);
+            const x2 = i % 10;
+            const y2 = Math.floor(i / 10);
+            const dist = Math.abs(x1 - x2) + Math.abs(y1 - y2);
+
+            if (dist < bestDist) {
+                bestDist = dist;
+                bestIdx = i;
+            }
+        }
+    });
+    return bestIdx;
+}
+
+function returnToTray(dieEl) {
+    trayElement.appendChild(dieEl);
+    dieEl.style.position = 'static';
+}
+
 
 // 4. Timer Logic
 function startTimer() {
@@ -239,13 +344,18 @@ function refreshHighlights() {
 function checkWinCondition() {
     const diceOnBoard = boardState.filter(x => x !== null).length;
     const greenDice = document.querySelectorAll('.die.valid').length;
-    const connected = isEverythingConnected(); // NEW CHECK
+    const connected = isEverythingConnected(); 
+    const dbg = 0; // set to 1 to force win for testing 
 
     if (diceOnBoard === 12 && greenDice === 12 && connected) {
+        // 1. IMMEDIATELY record the win in data
+        recordGameWon(); 
+
+        // 2. Stop the clock
         clearInterval(timerInterval);
         timerText.classList.add('win-flash');
 
-        // CHANGE THIS LINE to use victory-banner
+        // 3. Handle the UI
         const banner = document.getElementById('victory-banner');
         const scoreText = document.getElementById('final-score');
 
@@ -253,6 +363,17 @@ function checkWinCondition() {
             scoreText.textContent = ` ${timerText.textContent}`;
             banner.classList.remove('hidden');
         }
+
+        const gameBoard = document.getElementById('game-board');
+        const controls = document.getElementById('controls');
+        
+        // Ensure these elements exist before adding class to prevent crashes
+        if(gameBoard) gameBoard.classList.add('ui-disabled');
+        if(controls) controls.classList.add('ui-disabled');
+
+        // Show the new game button
+        const newGameBtn = document.getElementById('new-game-button');
+        if(newGameBtn) newGameBtn.style.display = 'block';
     }
 }
 
@@ -260,6 +381,21 @@ function closeModal() {
     const banner = document.getElementById('victory-banner');
     if (banner) banner.classList.add('hidden');
     setupGame(); // Starts a new game automatically
+}
+
+function confirmReset() {
+    const doubleCheck = confirm("Are you sure you want to delete your stats? This cannot be undone.");
+    
+    if (doubleCheck) {
+        // Clear the specific keys we used
+        localStorage.removeItem('dabble_played');
+        localStorage.removeItem('dabble_won');
+        
+        // Refresh the UI to show 0s
+        updateStatsUI();
+        
+        alert("Stats have been reset.");
+    }
 }
 
 function isEverythingConnected() {
@@ -314,4 +450,9 @@ function showWin() {
 }
 // Make it accessible to the console
 window.showWin = showWin;
+
+// Initialize on load
+loadStats();
+
+
 

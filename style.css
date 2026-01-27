@@ -39,6 +39,36 @@
     font-size: 1.6rem;
 }
 
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    margin: 10px auto;
+    font-family: sans-serif;
+    font-weight: bold;
+    color: white; /* Matches your timer */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Makes white text pop */
+}
+
+#stats {
+    font-size: 0.9rem;
+}
+
+/* 1. Improved UI-Disabled: No more gray/opacity! */
+.ui-disabled {
+    pointer-events: none; /* Just stops the clicking */
+    /* Removed grayscale and opacity so it looks great in screenshots */
+}
+
+/* Ensure the New Game button always stays active */
+#new-game-button {
+    pointer-events: auto !important;
+    opacity: 1 !important;
+}
+
+
 body {
     background-color: var(--bg-color);
     color: white;
@@ -73,6 +103,7 @@ body {
 
 
 
+/* 2. The 3D Die Base Style */
 .die {
     width: 7vw;
     height: 7vw;
@@ -83,10 +114,19 @@ body {
     justify-content: center;
     font-weight: bold;
     font-size: 5vw;
-    border-radius: 4px;
-    position: absolute; /* Needed for the dragging logic */
+    border-radius: 6px; /* Slightly rounder for a die feel */
+    position: absolute;
     touch-action: none;
     z-index: 100;
+
+    /* 3D Effect for iPhone & Desktop */
+    box-shadow: 
+        0 4px 0 #bbb,                /* The bottom "thickness" edge */
+        0 5px 10px rgba(0,0,0,0.3);  /* The shadow on the table/board */
+    
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+    -webkit-tap-highlight-color: transparent; /* Fix for iPhone blue flash */
+    user-select: none;
 }
 
 #dice-tray {
@@ -98,7 +138,16 @@ body {
     margin-bottom: 20px;
 }
 
+/* 3. The "Lift" effect when dragging (Add this class via JS) */
+.die.dragging {
+    transform: translateY(-10px) scale(1.1); /* Lifts above the finger */
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+    z-index: 1000;
+}
+
+
 /* For PC: Lock the size so it's not giant */
+/* Update your Desktop sizes to include the 3D edges */
 @media (min-width: 600px) {
     #game-board {
         grid-template-columns: repeat(10, 50px);
@@ -107,23 +156,28 @@ body {
     .cell { width: 50px; height: 50px; }
 
     .die { 
-        width: 45px;      /* Fixed size for desktop */
-        height: 45px;     /* Fixed size for desktop */
-        font-size: 24px;  /* Fixed font size for desktop */
-        position: relative; /* This helps them sit nicely in the tray when not being dragged */
+        width: 44px;      
+        height: 44px;     
+        font-size: 24px;  
+        position: relative;
+        box-shadow: 0 3px 0 #bbb, 0 4px 8px rgba(0,0,0,0.3);
     }
-
-    #dice-tray {
-        min-height: 60px; /* Ensure the tray is tall enough for the 45px dice */
+    
+    .die.valid {
+        box-shadow: 0 3px 0 #2E7D32, 0 4px 8px rgba(0,0,0,0.3);
     }
-
 }
 
+/* 4. The 3D Valid (Green) Die */
 .die.valid {
     background-color: #4CAF50 !important;
     color: white !important;
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+    /* Green bottom edge for the 3D look */
+    box-shadow: 
+        0 4px 0 #2E7D32, 
+        0 5px 10px rgba(0,0,0,0.3);
 }
+
 
 .win-flash {
     animation: glow 1s infinite alternate;
@@ -156,4 +210,24 @@ body {
     border-radius: 5px;
     cursor: pointer;
     font-size: 1rem;
+}
+
+.settings-area {
+    margin-top: 30px;
+    text-align: center;
+}
+
+#reset-stats-btn {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 5px 10px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#reset-stats-btn:hover {
+    color: white;
+    border-color: white;
 }

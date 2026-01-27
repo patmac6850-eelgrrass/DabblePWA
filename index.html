@@ -6,13 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dabble PWA</title>
     <link rel="stylesheet" href="style.css">
+
+    <meta name="apple-mobile-web-app-title" content="Dabble">
+    <link rel="icon" type="image/png" href="icon_dabble.png">
+    <link rel="apple-touch-icon" href="icon_dabble.png">
 </head>
 
 <body>
     <div id="game-container">
         <header>
             <h1>Dabble</h1>
-            <div id="timer">Time: 00:00</div>
+            <div class="header-container">
+                <div id="timer">00:00</div>
+                <div id="stats">
+                    P: <span id="games-played">0</span> | 
+                    W: <span id="games-won">0</span> | 
+                    <span id="win-percent">0</span>%
+                </div>
+            </div>
         </header>
 
         <div id="victory-banner" class="hidden">
@@ -36,6 +47,10 @@
                     <span class="slider"></span>
                     3-Letter Minimum
                 </label>
+            </div>
+
+            <div class="settings-area">
+                <button id="reset-stats-btn" onclick="confirmReset()">Reset All Stats</button>
             </div>
 
 
