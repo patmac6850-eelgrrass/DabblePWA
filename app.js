@@ -280,28 +280,25 @@ function refreshHighlights() {
     const allDiceElements = document.querySelectorAll('.die');
     allDiceElements.forEach(d => d.classList.remove('valid'));
 
-    // Sets to track which cells are part of a valid horizontal/vertical word
     const validHorizontal = new Set();
     const validVertical = new Set();
-
-    // Sets to track which cells HAVE a neighbor (to detect multi-letter sequences)
     const hasHorizontalNeighbor = new Set();
     const hasVerticalNeighbor = new Set();
 
-    // Helper to scan lines
     const scan = (indices, isHorizontal) => {
         let text = indices.map(i => boardState[i] || ' ').join('');
-        if (text.trim().length < minWordLength) return;
-
-        // Use the current minWordLength for the regex
-        const regexStr = `([A-Z]{${minWordLength},})`;
-        const wordRegex = new RegExp(regexStr, 'g');
+        
+        // THE FIX: Regex now looks for ANY sequence of 2 or more letters
+        // This ensures "TC" is detected even if the min length is 3
+        const wordRegex = /([A-Z]{2,})/g; 
         let match;
 
         while ((match = wordRegex.exec(text)) !== null) {
             const word = match[0];
             const startIdx = match.index;
-            const isWordValid = dictionary.has(word);
+            
+            // A sequence is ONLY valid if it's in the dictionary AND meets the min length
+            const isWordValid = dictionary.has(word) && (word.length >= minWordLength);
 
             for (let i = 0; i < word.length; i++) {
                 const boardIdx = indices[startIdx + i];
@@ -316,22 +313,23 @@ function refreshHighlights() {
         }
     };
 
-
-    // Scan all rows and columns
     for (let i = 0; i < 10; i++) {
-        scan(Array.from({ length: 10 }, (_, j) => i * 10 + j), true);  // Rows
-        scan(Array.from({ length: 10 }, (_, j) => j * 10 + i), false); // Cols
+        scan(Array.from({ length: 10 }, (_, j) => i * 10 + j), true);  
+        scan(Array.from({ length: 10 }, (_, j) => j * 10 + i), false); 
     }
 
-    // APPLY COLORS: A tile is only valid if it's not part of an INVALID sequence
     boardState.forEach((letter, i) => {
         if (!letter) return;
 
+        // An "invalid" flag is true if the tile is part of a sequence 
+        // but that sequence isn't in the 'valid' set.
         const hInvalid = hasHorizontalNeighbor.has(i) && !validHorizontal.has(i);
         const vInvalid = hasVerticalNeighbor.has(i) && !validVertical.has(i);
 
-        // If it's part of a sequence in EITHER direction, 
-        // it must be valid in ALL directions it participates in.
+        // Logic: 
+        // 1. Must not be part of any invalid horizontal sequence
+        // 2. Must not be part of any invalid vertical sequence
+        // 3. Must belong to at least one valid sequence
         if (!hInvalid && !vInvalid && (validHorizontal.has(i) || validVertical.has(i))) {
             const cell = boardElement.children[i];
             if (cell && cell.firstChild) cell.firstChild.classList.add('valid');
