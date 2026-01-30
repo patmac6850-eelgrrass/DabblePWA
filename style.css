@@ -249,12 +249,15 @@ body {
     min-height: 125px; 
     
     padding: 15px;
-    background-color: var(--bg-color);
+    background: #444;
+    /*background-color: var(--bg-color); */
     border-radius: 8px;
     margin: 10px auto; 
     gap: 8px;
     box-sizing: border-box; /* Ensures padding doesn't grow the width */
 }
+
+
 /* 3. The "Lift" effect when dragging (Add this class via JS) */
 .die.dragging {
     transform: translateY(-10px) scale(1.1); /* Lifts above the finger */
