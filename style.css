@@ -270,16 +270,22 @@ body {
     border-radius: 8px;
     margin: 10px auto;
     
-    /* THE FIX: Constraints for 6-per-row */
-    /* We set the max-width to fit exactly 6 dice + gaps */
-    /* If your dice are ~45px, this math works perfectly */
-    max-width: calc((45px * 6) + (8px * 5) + 30px); 
-    width: 90%; /* Fallback for very small screens */
+    /* Set the width to be about 70-80% of your grid's width */
+    width: 80%; 
+    max-width: 340px; /* This is the "hard stop" for the iPhone */
     
-    min-height: 125px; /* Keeps the "Jump" away */
+    min-height: 125px; 
     box-sizing: border-box;
 }
 
+/* Ensure the dice inside respect the 6-per-row rule */
+#dice-tray .die {
+    /* 100% divided by 6 is ~16%. 
+       Taking gaps into account, 14% is a safe bet. */
+    flex: 0 0 14%; 
+    aspect-ratio: 1 / 1; /* Keeps them square */
+    min-width: 40px;     /* Prevents them from getting too tiny */
+}
 
 
 /* 3. The "Lift" effect when dragging (Add this class via JS) */
