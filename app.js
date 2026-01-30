@@ -26,6 +26,12 @@ let boardState = Array(100).fill(null); // 10x10 grid
 let timerInterval;
 let secondsElapsed = 0;
 let draggedElement = null;
+let lastDiscoveredWord = "";
+
+let validHorizontal = new Set(); // NEW
+let validVertical = new Set();   // NEW
+
+
 
 
 // Elements
@@ -128,6 +134,10 @@ function setupGame() {
     
     createBoard();
     startTimer();
+
+    document.getElementById('def-close').onclick = () => {
+    document.getElementById('def-modal').classList.add('hidden');
+};
 }
 
 
@@ -139,6 +149,31 @@ function displayDice(dice) {
         dieEl.textContent = die.letter;
         dieEl.id = `die-${die.id}`;
         dieEl.style.position = 'static'; // Start in the tray
+
+        // --- NEW: CLICK LISTENER FOR DEFINITIONS ---
+        dieEl.addEventListener('click', (e) => {
+            // NEW: Check the time buffer
+            const timeSinceDrop = Date.now() - (dieEl.lastDropTime || 0);
+            if (timeSinceDrop < 300) {
+                console.log("Suppressed auto-click after drop");
+                return; 
+            }
+
+            const parentCell = dieEl.parentElement;
+            if (parentCell && parentCell.classList.contains('cell')) {
+                const index = parseInt(parentCell.dataset.index);
+                
+                // Use global sets
+                if (validHorizontal.has(index) || validVertical.has(index)) {
+                    const word = getFullWord(index);
+                    if (word) {
+                        fetchDefinition(word);
+                    }
+                }
+            }
+        });
+        // --- END NEW SECTION ---
+        
 
         dieEl.onpointerdown = (e) => {
             const startX = e.clientX;
@@ -182,28 +217,25 @@ function displayDice(dice) {
                 dieEl.style.visibility = 'visible';
 
                 let cell = elemBelow ? elemBelow.closest('.cell') : null;
-                if (cell) {
+                    if (cell) {
                     let targetIndex = parseInt(cell.dataset.index);
                     
-                    // If the cell is occupied, find the closest empty one
-                    if (boardState[targetIndex] !== null) {
-                        targetIndex = findNearestEmpty(targetIndex);
-                    }
+                    // IMPORTANT: Update the boardState BEFORE calling refresh
+                    boardState[targetIndex] = dieEl.textContent; 
+                    
+                    const finalCell = boardElement.children[targetIndex];
+                    finalCell.appendChild(dieEl);
+                    dieEl.style.position = 'static';
 
-                    // If we found a spot (on the board), place it
-                    if (targetIndex !== -1) {
-                        const finalCell = boardElement.children[targetIndex];
-                        finalCell.appendChild(dieEl);
-                        dieEl.style.position = 'static';
-                        boardState[targetIndex] = dieEl.textContent;
-                    } else {
-                        // Only return to tray if the WHOLE board is full (unlikely)
-                        returnToTray(dieEl);
-                    }
+                    // Now refresh with the index
+                    refreshHighlights(targetIndex); 
                 } else {
                     returnToTray(dieEl);
+                    refreshHighlights(); // No index here
                 }
-                refreshHighlights();
+
+                dieEl.lastDropTime = Date.now();
+                draggedElement = null;
             };
 
             document.addEventListener('pointermove', onPointerMove);
@@ -258,6 +290,40 @@ function startTimer() {
     }, 1000);
 }
 
+function getFullWord(index) {
+    // 1. Check Horizontal first (our tie-breaker)
+    if (validHorizontal.has(index)) {
+        return findSequence(index, 1); // 1 is for horizontal stepping
+    }
+    // 2. Check Vertical
+    if (validVertical.has(index)) {
+        return findSequence(index, 10); // 10 is for vertical stepping
+    }
+    return null;
+}
+
+function findSequence(index, step) {
+    let start = index;
+    let end = index;
+
+    // Scan backwards to find the start of the word
+    // (Ensure we stay on the same row if stepping by 1)
+    while (boardState[start - step] && (step === 10 || Math.floor((start - step) / 10) === Math.floor(start / 10))) {
+        start -= step;
+    }
+    // Scan forwards to find the end
+    while (boardState[end + step] && (step === 10 || Math.floor((end + step) / 10) === Math.floor(end / 10))) {
+        end += step;
+    }
+
+    // Extract the letters
+    let word = "";
+    for (let i = start; i <= end; i += step) {
+        word += boardState[i];
+    }
+    return word;
+}
+
 
 // Initialize
 rollButton.addEventListener('click', setupGame);
@@ -276,12 +342,12 @@ trayElement.addEventListener('drop', e => {
 });
 
 
-function refreshHighlights() {
+function refreshHighlights(droppedIndex = null) {
     const allDiceElements = document.querySelectorAll('.die');
     allDiceElements.forEach(d => d.classList.remove('valid'));
 
-    const validHorizontal = new Set();
-    const validVertical = new Set();
+    validHorizontal = new Set();
+    validVertical = new Set();
     const hasHorizontalNeighbor = new Set();
     const hasVerticalNeighbor = new Set();
 
@@ -336,8 +402,28 @@ function refreshHighlights() {
         }
     });
 
+ // --- UPDATED HUD LOGIC ---
+    try {
+        if (droppedIndex !== null) {
+            // Give the board a millisecond to "settle" or just run the check
+            const newWord = getFullWord(droppedIndex);
+            
+            // Only show HUD if it's a valid word and different from the last
+            if (newWord && newWord !== lastDiscoveredWord) {
+                showHUD(newWord);
+                lastDiscoveredWord = newWord;
+            }
+        }
+    } catch (e) {
+        console.error("HUD Logic Error:", e);
+    }
+
+    // --- 2. Check Win ---
+    // Moving this outside the try/catch ensures it ALWAYS runs
     checkWinCondition();
-}
+
+} // <--- THIS is the final bracket for refreshHighlights
+
 
 function checkWinCondition() {
     const diceOnBoard = boardState.filter(x => x !== null).length;
@@ -450,6 +536,54 @@ function showWin() {
         console.log("Error: Could not find victory-banner ID");
     }
 }
+
+function showHUD(word) {
+    const hud = document.getElementById('word-hud');
+    const msg = document.getElementById('hud-message');
+    
+    if (!hud || !msg) return;
+
+    msg.innerText = `Word Found: ${word}`;
+    hud.classList.remove('hud-hidden');
+
+    // --- THE FIX: Click toast to see definition ---
+    hud.onclick = () => {
+        fetchDefinition(word);
+        hud.classList.add('hud-hidden'); // Hide the toast once clicked
+    };
+
+    // Reset timer to ensure it stays visible for 4 full seconds
+    if (window.hudTimer) clearTimeout(window.hudTimer);
+    
+    window.hudTimer = setTimeout(() => {
+        hud.classList.add('hud-hidden');
+    }, 4000);
+}
+
+async function fetchDefinition(word) {
+    const modal = document.getElementById('def-modal');
+    const title = document.getElementById('def-title');
+    const body = document.getElementById('def-body');
+    
+    title.innerText = word;
+    body.innerText = "Loading definition...";
+    modal.classList.remove('hidden');
+
+    try {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        const data = await response.json();
+        
+        if (data[0] && data[0].meanings[0]) {
+            const def = data[0].meanings[0].definitions[0].definition;
+            body.innerText = def;
+        } else {
+            body.innerText = "Definition not found in the public dictionary.";
+        }
+    } catch (err) {
+        body.innerText = "Error fetching definition. Check your connection.";
+    }
+}
+
 // Make it accessible to the console
 window.showWin = showWin;
 

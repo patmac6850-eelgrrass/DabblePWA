@@ -128,6 +128,69 @@ body {
     touch-action: none;
 }
 
+#word-hud {
+    cursor: pointer; /* Changes the mouse to a hand icon */
+    user-select: none; /* Prevents text highlighting when tapping quickly */
+}
+
+#word-hud:active {
+    transform: translateX(-50%) scale(0.98); /* Slight "squish" effect when tapped */
+}
+
+#word-hud {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: rgba(0, 0, 0, 0.7); /* Semi-transparent */
+    backdrop-filter: blur(5px); /* Frosty glass effect */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    padding: 10px 20px;
+    z-index: 9999;
+    transition: opacity 0.4s, transform 0.4s;
+    pointer-events: auto; /* Allow clicking the toast itself */
+    
+}
+
+.hud-hidden {
+    opacity: 0;
+    transform: translate(-50%, -50px) !important;
+    pointer-events: none;
+}
+
+.hud-content {
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 0.9rem;
+}
+
+.hud-icon {
+    background: #4CAF50;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+/* Modal Divider */
+.def-divider {
+    border: 0;
+    height: 1px;
+    background: #444;
+    margin: 15px 0;
+}
+
+
 .cell {
     width: 8vmin;
     height: 8vmin;
