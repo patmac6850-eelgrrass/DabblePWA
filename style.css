@@ -162,12 +162,16 @@ body {
 }
 
 #dice-tray {
-    display: flex;
+    display: grid;
+    /* This creates exactly 6 equal columns */
+    grid-template-columns: repeat(6, 1fr); 
     gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-    min-height: 50px;
-    margin-bottom: 20px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    margin: 10px auto;
+    width: fit-content; /* Keeps the tray from stretching too wide */
+    justify-items: center; /* Centers the dice within their grid squares */
 }
 
 /* 3. The "Lift" effect when dragging (Add this class via JS) */
