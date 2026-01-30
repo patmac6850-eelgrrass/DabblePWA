@@ -103,7 +103,17 @@ body {
     padding: 10px;
     box-sizing: border-box;
     overflow: hidden;
-}
+    height: 100dvh; /* "Dynamic Viewport Height" - much better for iPad Safari */
+    touch-action: none; /* Stops the screen from sliding around while you drag */
+} 
+
+
+
+
+
+
+
+
 
 /* This container holds everything and scales it */
 #main-wrapper {
@@ -222,21 +232,26 @@ body {
     transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
     -webkit-tap-highlight-color: transparent; /* Fix for iPhone blue flash */
     user-select: none;
-}
+}   /* background: rgba(0, 0, 0, 0.2); */
 
 #dice-tray {
-    display: grid;
-    /* This creates exactly 6 equal columns */
-    grid-template-columns: repeat(6, 1fr); 
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; 
+    align-content: flex-start; /* Keeps dice at the top of the tray area */
+    
+    /* WIDTH CALCULATION: */
+    /* (6 dice * 45px) + (5 gaps * 8px) + padding = ~320px-350px */
+    width: 350px; 
+    min-height: 120px; /* Reserves space for exactly 2 rows */
+    
+    padding: 15px;
+    background-color: var(--bg-color);
+    
+    border-radius: 8px;
+    margin: 20px auto; /* Centers the tray horizontally */
     gap: 8px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    margin: 10px auto;
-    width: fit-content; /* Keeps the tray from stretching too wide */
-    justify-items: center; /* Centers the dice within their grid squares */
 }
-
 /* 3. The "Lift" effect when dragging (Add this class via JS) */
 .die.dragging {
     transform: translateY(-10px) scale(1.1); /* Lifts above the finger */
