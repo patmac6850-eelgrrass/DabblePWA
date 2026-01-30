@@ -92,37 +92,47 @@
 
 
 body {
-    background-color: var(--bg-color);
+    background-color: var(--bg-color); /* Add this back! */
     color: white;
-    font-family: sans-serif;
     display: flex;
-    justify-content: center;
-    padding: 20px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    margin: 0;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* This container holds everything and scales it */
+#main-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    max-width: 500px; /* Keeps it from getting too wide on iPad */
+    align-items: center;
 }
 
 /* Responsive container */
 #game-board {
     display: grid;
-    grid-template-columns: repeat(10, 9vw); 
-    grid-template-rows: repeat(10, 9vw);
-    background: #444; /* This acts as the grid line color */
-    gap: 1px; /* The gap creates the lines */
-    padding: 1px;
-    margin: 10px auto;
+    background: #444; /* The 'line' color */
+    /* Use 'vmin' so it picks the smaller of height or width */
+    grid-template-columns: repeat(10, 8vmin); 
+    grid-template-rows: repeat(10, 8vmin);
+    gap: 1px;
+    margin: 5px auto; /* Reduced margin to save space */
     width: fit-content;
     touch-action: none;
 }
 
 .cell {
-    width: 9vw;
-    height: 9vw;
-    background: #222; /* Dark cell interiors */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
+    width: 8vmin;
+    height: 8vmin;
+    background: #222;
 }
-
 
 
 /* 2. The 3D Die Base Style */
@@ -235,18 +245,21 @@ body {
 }
 
 .settings-area {
-    margin-top: 30px;
+    margin-top: auto; /* This pushes the button to the bottom */
+    width: 100%;
     text-align: center;
+    /* This is the magic "iPhone padding" */
+    padding-bottom: env(safe-area-inset-bottom, 20px); 
 }
 
 #reset-stats-btn {
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: rgba(255, 255, 255, 0.6);
-    padding: 5px 10px;
-    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.1); /* Slight grey background so you can see it */
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    padding: 10px 20px; /* Bigger tap target for fingers */
+    font-size: 0.9rem;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
 #reset-stats-btn:hover {
