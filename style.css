@@ -238,19 +238,22 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center; 
-    align-content: flex-start; /* Keeps dice at the top of the tray area */
+    align-content: flex-start; /* Keeps dice starting from the top */
     
-    /* WIDTH CALCULATION: */
-    /* (6 dice * 45px) + (5 gaps * 8px) + padding = ~320px-350px */
-    width: 350px; 
-    min-height: 120px; /* Reserves space for exactly 2 rows */
+    /* WIDTH: Adjust this so exactly 6 dice fit per row */
+    /* If your dice are 50px + 8px gap, 360px is usually the sweet spot */
+    width: 360px; 
+    
+    /* HEIGHT: This stops the jarring movement! */
+    /* Reserve space for 2 rows even if they are empty */
+    min-height: 125px; 
     
     padding: 15px;
     background-color: var(--bg-color);
-    
     border-radius: 8px;
-    margin: 20px auto; /* Centers the tray horizontally */
+    margin: 10px auto; 
     gap: 8px;
+    box-sizing: border-box; /* Ensures padding doesn't grow the width */
 }
 /* 3. The "Lift" effect when dragging (Add this class via JS) */
 .die.dragging {
