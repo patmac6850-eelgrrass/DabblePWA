@@ -234,7 +234,7 @@ body {
     user-select: none;
 }   /* background: rgba(0, 0, 0, 0.2); */
 
-#dice-tray {
+#diceNOT-USED-tray {
     display: flex;
     flex-wrap: wrap;
     justify-content: center; 
@@ -243,6 +243,9 @@ body {
     /* WIDTH: Adjust this so exactly 6 dice fit per row */
     /* If your dice are 50px + 8px gap, 360px is usually the sweet spot */
     width: 360px; 
+
+
+    
     
     /* HEIGHT: This stops the jarring movement! */
     /* Reserve space for 2 rows even if they are empty */
@@ -256,6 +259,27 @@ body {
     gap: 8px;
     box-sizing: border-box; /* Ensures padding doesn't grow the width */
 }
+
+#dice-tray {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 15px;
+    background: #444;
+    border-radius: 8px;
+    margin: 10px auto;
+    
+    /* THE FIX: Constraints for 6-per-row */
+    /* We set the max-width to fit exactly 6 dice + gaps */
+    /* If your dice are ~45px, this math works perfectly */
+    max-width: calc((45px * 6) + (8px * 5) + 30px); 
+    width: 90%; /* Fallback for very small screens */
+    
+    min-height: 125px; /* Keeps the "Jump" away */
+    box-sizing: border-box;
+}
+
 
 
 /* 3. The "Lift" effect when dragging (Add this class via JS) */
