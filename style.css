@@ -1,6 +1,6 @@
 :root {
     --bg-color: #1a1a1a;
-    --tile-color: #ffffff;
+    --tile-color: #ffff00;
     --valid-color: #4CAF50; /* Green for valid words */
     --text-dark: #333;
 }
@@ -93,6 +93,7 @@
 
 body {
     background-color: var(--bg-color); /* Add this back! */
+    background-color:#2c2c1f ;
     color: white;
     display: flex;
     flex-direction: column;

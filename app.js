@@ -196,6 +196,7 @@ function displayDice(dice) {
                 };
 
             const onPointerUp = (ev) => {
+                
                 // NEW: If they just tapped it (didn't move), do nothing and stay put
                 if (!hasMoved && dieEl.parentElement.classList.contains('cell')) {
                     dieEl.style.position = 'static'; // Snap back into its current cell
@@ -218,6 +219,14 @@ function displayDice(dice) {
 
                 let cell = elemBelow ? elemBelow.closest('.cell') : null;
                     if (cell) {
+                        // --- THE FIX: Check if the cell already has a child (a die) ---
+                        if (cell.children.length > 0) {
+                            console.log("Cell occupied! Returning to tray.");
+                            returnToTray(dieEl);
+                            refreshHighlights();
+                            return; // Stop here so we don't stack
+                        }
+
                     let targetIndex = parseInt(cell.dataset.index);
                     
                     // IMPORTANT: Update the boardState BEFORE calling refresh
