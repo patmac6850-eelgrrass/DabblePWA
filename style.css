@@ -93,7 +93,7 @@
 
 body {
     background-color: var(--bg-color); /* Add this back! */
-    background-color:#2c2c1f ;
+    background-color:#6e6e2e ;
     color: white;
     display: flex;
     flex-direction: column;
@@ -235,57 +235,36 @@ body {
     user-select: none;
 }   /* background: rgba(0, 0, 0, 0.2); */
 
-#diceNOT-USED-tray {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; 
-    align-content: flex-start; /* Keeps dice starting from the top */
-    
-    /* WIDTH: Adjust this so exactly 6 dice fit per row */
-    /* If your dice are 50px + 8px gap, 360px is usually the sweet spot */
-    width: 360px; 
 
-
-    
-    
-    /* HEIGHT: This stops the jarring movement! */
-    /* Reserve space for 2 rows even if they are empty */
-    min-height: 125px; 
-    
-    padding: 15px;
-    background: #444;
-    /*background-color: var(--bg-color); */
-    border-radius: 8px;
-    margin: 10px auto; 
-    gap: 8px;
-    box-sizing: border-box; /* Ensures padding doesn't grow the width */
-}
 
 #dice-tray {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid; /* Switched from flex to grid */
+    grid-template-columns: repeat(6, 1fr); /* FORCES exactly 6 columns */
+    grid-template-rows: repeat(2, 1fr);    /* FORCES exactly 2 rows */
     gap: 8px;
-    padding: 15px;
+    padding: 12px;
     background: #444;
     border-radius: 8px;
     margin: 10px auto;
     
-    /* Set the width to be about 70-80% of your grid's width */
-    width: 80%; 
-    max-width: 340px; /* This is the "hard stop" for the iPhone */
-    
-    min-height: 125px; 
+    width: 95%;
+    max-width: 360px; 
+    min-height: 120px; 
     box-sizing: border-box;
 }
 
-/* Ensure the dice inside respect the 6-per-row rule */
 #dice-tray .die {
-    /* 100% divided by 6 is ~16%. 
-       Taking gaps into account, 14% is a safe bet. */
-    flex: 0 0 14%; 
-    aspect-ratio: 1 / 1; /* Keeps them square */
-    min-width: 40px;     /* Prevents them from getting too tiny */
+    position: relative !important; 
+    width: 100% !important;   /* Fill the grid square width */
+    height: auto !important; 
+    aspect-ratio: 1 / 1 !important; /* Force the height to match the width */
+    
+    /* Reset any old margins/transforms */
+    margin: 0 !important;
+    left: 0 !important;
+    top: 0 !important;
+    
+    font-size: 1.2rem;
 }
 
 
