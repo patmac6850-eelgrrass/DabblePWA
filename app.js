@@ -182,9 +182,16 @@ function displayDice(dice) {
             dieEl.setPointerCapture(e.pointerId); // Keeps touch locked to the die
             draggedElement = dieEl;
 
+            // 1. ADD THIS: This tells CSS "I am moving now!"
+            dieEl.classList.add('dragging');
+
             // Move die to absolute for dragging
             dieEl.style.position = 'fixed';
             dieEl.style.zIndex = 1000;
+
+            // --- THE FIX: Move it to the body so it's not "trapped" in the tray ---
+             document.body.appendChild(dieEl); 
+    // ---------------------------------------------------------------------
 
             const onPointerMove = (ev) => {
                 // If moved more than 5px, it's a real drag
@@ -196,6 +203,9 @@ function displayDice(dice) {
                 };
 
             const onPointerUp = (ev) => {
+                // 2. ADD THIS: This tells CSS "I have stopped moving"
+                dieEl.classList.remove('dragging');// 2. ADD THIS: This tells CSS "I have stopped moving"
+    
                 
                 // NEW: If they just tapped it (didn't move), do nothing and stay put
                 if (!hasMoved && dieEl.parentElement.classList.contains('cell')) {
@@ -243,6 +253,12 @@ function displayDice(dice) {
                     refreshHighlights(); // No index here
                 }
 
+                // --- FINAL CLEANUP: This wipes the 776px/940px "Ghost" coordinates ---
+                dieEl.style.left = '';
+                dieEl.style.top = '';
+                dieEl.style.zIndex = '';
+                // ---------------------------------------------------------------------
+
                 dieEl.lastDropTime = Date.now();
                 draggedElement = null;
             };
@@ -258,6 +274,9 @@ function displayDice(dice) {
         trayElement.appendChild(dieEl);
     });
 }
+
+
+
 
 function findNearestEmpty(startIndex) {
     // Check neighbors in expanding rings (Up, Down, Left, Right)

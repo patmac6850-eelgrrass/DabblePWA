@@ -237,42 +237,49 @@ body {
 
 
 
+/* 1. The Tray: Grid is safest for the 6x2 layout */
 #dice-tray {
-    display: grid; /* Switched from flex to grid */
-    grid-template-columns: repeat(6, 1fr); /* FORCES exactly 6 columns */
-    grid-template-rows: repeat(2, 1fr);    /* FORCES exactly 2 rows */
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(2, 1fr);
     gap: 8px;
     padding: 12px;
     background: #444;
     border-radius: 8px;
     margin: 10px auto;
-    
     width: 95%;
-    max-width: 360px; 
-    min-height: 120px; 
+    max-width: 340px; /* Limits iPhone width */
+    min-height: 110px;
     box-sizing: border-box;
 }
 
+/* 2. The Die in the Tray: Square and Relative */
 #dice-tray .die {
-    position: relative !important; 
-    width: 100% !important;   /* Fill the grid square width */
-    height: auto !important; 
-    aspect-ratio: 1 / 1 !important; /* Force the height to match the width */
-    
-    /* Reset any old margins/transforms */
+    position: relative !important; /* Bolted in while sitting still */
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important; /* Keeps them square on iPhone */
     margin: 0 !important;
-    left: 0 !important;
-    top: 0 !important;
-    
     font-size: 1.2rem;
 }
 
-
-/* 3. The "Lift" effect when dragging (Add this class via JS) */
+/* 3. THE FIX: The Die while Traveling */
 .die.dragging {
-    transform: translateY(-10px) scale(1.1); /* Lifts above the finger */
-    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-    z-index: 1000;
+    position: fixed !important; /* This now beats the tray rule! */
+    z-index: 9999 !important;
+    width: 50px !important;  /* Standard size while in flight */
+    height: 50px !important;
+    pointer-events: none;    /* Important for document.elementFromPoint */
+    transform: scale(1.1);   /* Slightly larger so you can see it */
+
+    
+}
+
+/* 4. The Die on the Board: Fill the square */
+.cell .die {
+    position: static !important;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 
