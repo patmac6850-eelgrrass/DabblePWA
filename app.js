@@ -153,7 +153,7 @@ function displayDice(dice) {
                 }
             }
         });
-dieEl.onpointerdown = (e) => {
+        dieEl.onpointerdown = (e) => {
             const startX = e.clientX;
             const startY = e.clientY;
             let hasMoved = false;
