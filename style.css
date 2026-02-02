@@ -93,7 +93,7 @@
 
 body {
     background-color: var(--bg-color); /* Add this back! */
-    background-color:#6e6e2e ;
+  /*  background-color:#6e6e2e ;  */
     color: white;
     display: flex;
     flex-direction: column;
