@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dabble PWA</title>
     <link rel="stylesheet" href="style.css">
-    
-
 
     <meta name="apple-mobile-web-app-title" content="Dabble">
     <link rel="icon" type="image/png" href="icon_dabble.png">
@@ -15,15 +13,12 @@
 </head>
 
 <body>
-    <body>
-    <div id="main-wrapper">
-        </div>
     <div id="game-container">
         <header>
-            <h1>Dabble-</h1>
+            <h1>Dabble</h1>
             <div class="header-container">
                 <div id="timer">00:00</div>
-               <div id="stats">
+                <div id="stats">
                     <span class="stat-item">PLAYED <span id="games-played">0</span></span>
                     <span class="stat-dot">&bull;</span>
                     <span class="stat-item">WON <span id="games-won">0</span></span>
@@ -39,17 +34,12 @@
             </div>
         </div>
 
-
-
-
         <div id="game-board"></div>
-
         <div id="dice-tray"></div>
 
-        <div class="controls">
+        <div id="controls" class="controls">
             <button id="roll-button">New Game / Roll</button>
 
-            <h1> </h1>
             <div class="settings">
                 <label class="switch">
                     <input type="checkbox" id="min-three-toggle">
@@ -61,8 +51,6 @@
             <div class="settings-area">
                 <button id="reset-stats-btn" onclick="confirmReset()">Reset All Stats</button>
             </div>
-
-
         </div>
 
         <div id="word-hud" class="hud-hidden">
@@ -83,20 +71,16 @@
     </div>
 
     <div id="custom-confirm-modal" class="modal hidden">
-    <div class="modal-content">
-        <h3>Reset All Stats?</h3>
-        <p>This will permanently delete your win history and best times.</p>
-        <div class="modal-buttons">
-            <button id="confirm-cancel">Cancel</button>
-            <button id="confirm-delete">Delete Everything</button>
+        <div class="modal-content">
+            <h3>Reset All Stats?</h3>
+            <p>This will permanently delete your win history and best times.</p>
+            <div class="modal-buttons">
+                <button id="confirm-cancel">Cancel</button>
+                <button id="confirm-delete">Delete Everything</button>
+            </div>
         </div>
     </div>
-    </div>
-    </body>
 
     <script src="app.js"></script>
-
-   
 </body>
-
 </html>

@@ -1,42 +1,44 @@
 :root {
     --bg-color: #1a1a1a;
     --tile-color: #ffff00;
-    --valid-color: #4CAF50; /* Green for valid words */
+    --valid-color: #4CAF50;
     --text-dark: #333;
 }
 
-#game-container {
-    position: relative; /* This is the anchor for the floating banner */
-}
-
-#victory-banner {
-    /* This makes it float at the VERY top of the screen */
-    position: fixed; 
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    
-    /* Look & Feel */
-    background-color: #4CAF50; /* Green! */
+/* --- Layout Defaults --- */
+body {
+    background-color: var(--bg-color);
     color: white;
-    padding: 12px 30px;
-    border-radius: 50px; /* Clean pill shape */
-    text-align: center;
-    z-index: 9999; /* Ensures it is above everything else */
-    width: fit-content;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-    pointer-events: none; /* Allows user to still click things under it */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+    height: 100dvh; /* Dynamic height for iPad/iPhone Safari */
+    position: fixed;
+    width: 100%;
+    touch-action: none; /* Stops the screen from sliding while dragging */
+    -webkit-user-select: none;
+    user-select: none;
 }
 
-#victory-banner h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    color: white; /* Make sure text is readable on green */
+#game-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    max-width: 500px;
+    align-items: center;
 }
 
-#victory-banner h2 {
-    margin: 0;
-    font-size: 1.6rem;
+/* --- Header & Stats --- */
+header h1 {
+    margin: 5px 0;
+    font-size: 1.8rem;
 }
 
 .header-container {
@@ -45,69 +47,214 @@
     align-items: center;
     width: 100%;
     max-width: 400px;
-    margin: 10px auto;
+    margin: 5px auto;
     font-family: sans-serif;
     font-weight: bold;
-    color: white; /* Matches your timer */
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Makes white text pop */
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 #stats {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-    background: rgba(255, 255, 255, 0.05); /* Subtle background bar */
-    padding: 6px 15px;
+    font-size: 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
     border-radius: 20px;
 }
 
-.stat-item {
-    font-weight: 600;
-    color: #bbb; /* Dim the label slightly */
+.stat-item span { color: #fff; }
+.stat-dot { color: #4CAF50; font-weight: bold; }
+
+/* --- Game Board & Cells --- */
+#game-board {
+    display: grid;
+    background: #444;
+    grid-template-columns: repeat(10, 8vmin); 
+    grid-template-rows: repeat(10, 8vmin);
+    gap: 1px;
+    margin: 5px auto;
+    width: fit-content;
+    touch-action: none;
 }
 
-.stat-item span {
-    color: #fff; /* Make the actual numbers pop */
+.cell {
+    width: 8vmin;
+    height: 8vmin;
+    background: #222;
 }
 
-.stat-dot {
-    color: #4CAF50; /* Match your green theme */
+/* --- Dice Styling --- */
+.die {
+    width: 7vw;
+    height: 7vw;
+    background-color: white;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: bold;
-    user-select: none;
+    font-size: 5vw;
+    border-radius: 6px;
+    position: absolute;
+    touch-action: none;
+    z-index: 100;
+    box-shadow: 0 4px 0 #bbb, 0 5px 10px rgba(0,0,0,0.3);
+    transition: transform 0.1s ease-out;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* 1. Improved UI-Disabled: No more gray/opacity! */
-.ui-disabled {
-    pointer-events: none; /* Just stops the clicking */
-    /* Removed grayscale and opacity so it looks great in screenshots */
+.die.valid {
+    background-color: #4CAF50 !important;
+    color: white !important;
+    box-shadow: 0 4px 0 #2E7D32, 0 5px 10px rgba(0,0,0,0.3);
 }
 
-/* Ensure the New Game button always stays active */
-#new-game-button {
-    pointer-events: auto !important;
-    opacity: 1 !important;
+/* Die Location Logic */
+#dice-tray {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 8px;
+    padding: 12px;
+    background: #444;
+    border-radius: 8px;
+    margin: 10px auto;
+    width: 95%;
+    max-width: 340px;
+    min-height: 110px;
+    box-sizing: border-box;
 }
 
+#dice-tray .die {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    font-size: 1.2rem;
+}
 
-body {
-    background-color: var(--bg-color); /* Add this back! */
-  /*  background-color:#6e6e2e ;  */
+.cell .die {
+    position: static !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.die.dragging {
+    position: fixed !important;
+    z-index: 9999 !important;
+    width: 50px !important;
+    height: 50px !important;
+    pointer-events: none; /* iPhone can see through it to the cell */
+    transform: scale(1.1);
+    opacity: 0.9;
+}
+
+/* --- UI Components --- */
+#victory-banner {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4CAF50;
     color: white;
+    padding: 12px 30px;
+    border-radius: 50px;
+    z-index: 10001;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+
+#word-hud {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    border-radius: 25px;
+    padding: 10px 20px;
+    z-index: 9999;
+    transition: opacity 0.4s, transform 0.4s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.hud-hidden {
+    opacity: 0;
+    transform: translate(-50%, -50px) !important;
+    pointer-events: none;
+}
+
+/* --- Modals --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10002; /* Always top */
+}
+
+.modal-content {
+    background: #222;
+    padding: 25px;
+    border-radius: 15px;
+    border: 2px solid #4CAF50;
+    text-align: center;
+    max-width: 300px;
+    width: 80%;
+}
+
+/* --- Buttons & Controls --- */
+.controls {
     display: flex;
     flex-direction: column;
+    gap: 10px;
+    width: 100%;
     align-items: center;
-    justify-content: flex-start;
-    height: 100vh;
-    margin: 0;
-    padding: 10px;
-    box-sizing: border-box;
-    overflow: hidden;
-    height: 100dvh; /* "Dynamic Viewport Height" - much better for iPad Safari */
-    touch-action: none; /* Stops the screen from sliding around while you drag */
-} 
+}
 
+#roll-button {
+    padding: 12px 24px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+#reset-stats-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ccc;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+.ui-disabled { pointer-events: none; }
+
+/* --- PC Sizing Overrides --- */
+@media (min-width: 600px) {
+    #game-board {
+        grid-template-columns: repeat(10, 50px);
+        grid-template-rows: repeat(10, 50px);
+    }
+    .cell { width: 50px; height: 50px; }
+    .die { 
+        width: 44px;      
+        height: 44px;     
+        font-size: 24px;  
+        position: relative;
+    }
+}
 
 
 
