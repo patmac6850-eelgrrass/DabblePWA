@@ -153,72 +153,85 @@ function displayDice(dice) {
                 }
             }
         });
-
-        dieEl.onpointerdown = (e) => {
+dieEl.onpointerdown = (e) => {
             const startX = e.clientX;
             const startY = e.clientY;
             let hasMoved = false;
             dieEl.setPointerCapture(e.pointerId);
             draggedElement = dieEl;
 
-            dieEl.classList.add('dragging');
-            dieEl.style.position = 'fixed';
-            dieEl.style.zIndex = 1000;
-
-            // STALE GREEN FIX: Clear state immediately
-            if (dieEl.parentElement.classList.contains('cell')) {
-                boardState[dieEl.parentElement.dataset.index] = null;
-                refreshHighlights();
-            }
-
-            // PORTAL FIX: Move to body for iPhone visibility
-            document.body.appendChild(dieEl); 
-
             const onPointerMove = (ev) => {
-                if (Math.abs(ev.clientX - startX) > 5 || Math.abs(ev.clientY - startY) > 5) {
+                const moveX = Math.abs(ev.clientX - startX);
+                const moveY = Math.abs(ev.clientY - startY);
+
+                // Only start the "Drag" if they move more than 7 pixels
+                if (!hasMoved && (moveX > 7 || moveY > 7)) {
                     hasMoved = true;
+                    
+                    // Now make it look and act like a dragged item
+                    dieEl.classList.add('dragging');
+                    dieEl.style.position = 'fixed';
+                    dieEl.style.zIndex = 1000;
+
+                    if (dieEl.parentElement && dieEl.parentElement.classList.contains('cell')) {
+                        boardState[dieEl.parentElement.dataset.index] = null;
+                        refreshHighlights();
+                    }
+                    document.body.appendChild(dieEl); 
                 }
-                dieEl.style.left = ev.clientX - dieEl.offsetWidth / 2 + 'px';
-                dieEl.style.top = ev.clientY - dieEl.offsetHeight / 2 + 'px';
+
+                if (hasMoved) {
+                    dieEl.style.left = ev.clientX - dieEl.offsetWidth / 2 + 'px';
+                    dieEl.style.top = ev.clientY - dieEl.offsetHeight / 2 + 'px';
+                }
             };
 
             const onPointerUp = (ev) => {
-                dieEl.classList.remove('dragging');
-                
-                if (!hasMoved && dieEl.lastParent) {
-                    // Logic for a stationary tap if needed
-                }
-
                 dieEl.releasePointerCapture(ev.pointerId);
                 document.removeEventListener('pointermove', onPointerMove);
                 document.removeEventListener('pointerup', onPointerUp);
 
-                dieEl.style.visibility = 'hidden';
-                let elemBelow = document.elementFromPoint(ev.clientX, ev.clientY);
-                dieEl.style.visibility = 'visible';
-
-                let cell = elemBelow ? elemBelow.closest('.cell') : null;
-
-                if (cell) {
-                    let targetIndex = parseInt(cell.dataset.index);
+                if (!hasMoved) {
+                    // --- IT WAS A TAP ---
+                    dieEl.classList.remove('dragging');
                     
-                    // NEAREST SPACE FIX: Slide if occupied
-                    if (cell.children.length > 0) {
-                        targetIndex = findNearestEmpty(targetIndex);
+                    const parentCell = dieEl.parentElement;
+                    if (parentCell && parentCell.classList.contains('cell')) {
+                        const index = parseInt(parentCell.dataset.index);
+                        // If it's part of a valid word, show definition immediately
+                        if (validHorizontal.has(index) || validVertical.has(index)) {
+                            const word = getFullWord(index);
+                            if (word) fetchDefinition(word);
+                        }
                     }
+                } else {
+                    // --- IT WAS A DRAG ---
+                    dieEl.classList.remove('dragging');
+                    dieEl.style.visibility = 'hidden';
+                    let elemBelow = document.elementFromPoint(ev.clientX, ev.clientY);
+                    dieEl.style.visibility = 'visible';
 
-                    if (targetIndex !== -1) {
-                        boardState[targetIndex] = dieEl.textContent; 
-                        boardElement.children[targetIndex].appendChild(dieEl);
-                        dieEl.style.position = 'static';
-                        refreshHighlights(targetIndex); 
+                    let cell = elemBelow ? elemBelow.closest('.cell') : null;
+
+                    if (cell) {
+                        let targetIndex = parseInt(cell.dataset.index);
+                        if (cell.children.length > 0) {
+                            targetIndex = findNearestEmpty(targetIndex);
+                        }
+
+                        if (targetIndex !== -1) {
+                            boardState[targetIndex] = dieEl.textContent; 
+                            boardElement.children[targetIndex].appendChild(dieEl);
+                            dieEl.style.position = 'static';
+                            refreshHighlights(targetIndex); 
+                        } else {
+                            returnToTray(dieEl);
+                            refreshHighlights();
+                        }
                     } else {
                         returnToTray(dieEl);
                         refreshHighlights();
                     }
-                } else {
-                    returnToTray(dieEl);
-                    refreshHighlights();
                 }
 
                 dieEl.style.left = '';
@@ -230,7 +243,6 @@ function displayDice(dice) {
 
             document.addEventListener('pointermove', onPointerMove);
             document.addEventListener('pointerup', onPointerUp);
-            onPointerMove(e);
         };
 
         dieEl.ondragstart = () => false;
