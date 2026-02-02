@@ -37,21 +37,45 @@
         <div id="game-board"></div>
         <div id="dice-tray"></div>
 
-        <div id="controls" class="controls">
-            <button id="roll-button">New Game / Roll</button>
+<div class="controls">
+    <button id="roll-button">New Game / Roll</button>
+    
+    <div class="secondary-btns">
+        <button id="menu-btn" class="icon-btn">⚙️ Settings & Rules</button>
+    </div>
+</div>
 
-            <div class="settings">
-                <label class="switch">
-                    <input type="checkbox" id="min-three-toggle">
-                    <span class="slider"></span>
-                    3-Letter Minimum
-                </label>
-            </div>
+<div id="settings-modal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Settings & Rules</h2>
+        <hr class="def-divider">
+        
+        <div class="rules-box">
+            <h3>How to Play</h3>
+            <p>1. Arrange all 12 dice on the board.</p>
+            <p>2. Words must be 2+ letters (unless 3-min is on).</p>
+            <p>3. All words must be connected in one cluster.</p>
+            <p>4. Green dice indicate a valid dictionary word.</p>
+            <p>5. Click on a green word for the definition.</p>
 
-            <div class="settings-area">
-                <button id="reset-stats-btn" onclick="confirmReset()">Reset All Stats</button>
-            </div>
         </div>
+
+        <hr class="def-divider">
+
+        <div class="settings-group">
+            <label class="switch">
+                <input type="checkbox" id="min-three-toggle">
+                <span class="slider"></span>
+                3-Letter Minimum
+            </label>
+        </div>
+
+        <button id="reset-stats-btn" onclick="confirmReset()">Reset All Stats</button>
+        
+        <br><br>
+        <button id="settings-close" class="close-btn">Close</button>
+    </div>
+</div>
 
         <div id="word-hud" class="hud-hidden">
             <div class="hud-content">

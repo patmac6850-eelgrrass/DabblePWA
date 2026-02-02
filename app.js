@@ -435,3 +435,18 @@ rollButton.addEventListener('click', setupGame);
 loadDictionary();
 createBoard();
 loadStats();
+
+// Settings Modal Logic
+const settingsModal = document.getElementById('settings-modal');
+const menuBtn = document.getElementById('menu-btn');
+const settingsClose = document.getElementById('settings-close');
+
+menuBtn.onclick = () => settingsModal.classList.remove('hidden');
+settingsClose.onclick = () => settingsModal.classList.add('hidden');
+
+// Close modal if they click the dark background
+window.onclick = (event) => {
+    if (event.target == settingsModal) {
+        settingsModal.classList.add('hidden');
+    }
+}

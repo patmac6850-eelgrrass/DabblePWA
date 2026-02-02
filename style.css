@@ -576,3 +576,54 @@ body {
     padding: 10px 20px;
     border-radius: 5px;
 }
+
+/* Make the rules section easy to read */
+.rules-box {
+    text-align: left;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.rules-box h3 {
+    margin-top: 0;
+    color: #4CAF50;
+    font-size: 1rem;
+}
+
+/* Style for the gear/menu button */
+.secondary-btns {
+    margin-top: 15px;
+}
+
+.icon-btn {
+    background: none;
+    border: 1px solid #555;
+    color: #aaa;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+/* A prominent Close button */
+.close-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: bold;
+    width: 100%;
+}
+
+.settings-group {
+    display: flex;            /* Enables Flexbox */
+    justify-content: left;  /* Centers the content horizontally */
+    align-items: left;      /* Centers the content vertically */
+    margin: 20px 0;           /* Adds some breathing room top and bottom */
+    width: 100%;
+}
