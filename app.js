@@ -1,8 +1,15 @@
 // Game State
 const diceConfigs = [
     "MMLLBY", "VFGKPP", "HHNNRR", "DFRLLW", "RRDLGG", "XKBSZN",
-    "WHHTTP", "CCBTJD", "CCMTTS", "OIINNY", "AEIOUU", "AAEEOO"
+    "WHHTTP", "AEIOUU", "CCMTTS", "OIINNY", "AEIOUU", "AAEEOO"
 ];
+
+//const diceConfigs = [
+//    "MMLLBY", "VFGKPP", "HHNNRR", "DFRLLW", "RRDLGG", "XKBSZN",
+//    "WHHTTP", "CCBTJD", "CCMTTS", "OIINNY", "AEIOUU", "AAEEOO"
+//];
+
+
 
 let minWordLength = localStorage.getItem('minWordLength') ? parseInt(localStorage.getItem('minWordLength')) : 2;
 
@@ -42,6 +49,26 @@ function createBoard() {
         boardElement.appendChild(cell);
     }
 }
+
+
+
+const clearButton = document.getElementById('clear-button');
+
+clearButton.onclick = () => {
+    // 1. Physically move all dice elements back to the tray
+    const allDice = document.querySelectorAll('.die');
+    allDice.forEach(die => {
+        trayElement.appendChild(die);
+        die.style.position = 'static';
+        die.classList.remove('valid');
+    });
+
+    // 2. Wipe the internal board tracking array
+    boardState.fill(null);
+    
+    // 3. Update the highlights (clears any remaining green cells)
+    refreshHighlights();
+};
 
 // Stats Logic
 function updateStatsUI() {
@@ -355,7 +382,7 @@ function checkWinCondition() {
             banner.classList.remove('hidden');
         }
         document.getElementById('game-board')?.classList.add('ui-disabled');
-        document.getElementById('controls')?.classList.add('ui-disabled');
+       // document.getElementById('controls')?.classList.add('ui-disabled');
     }
 }
 
@@ -430,8 +457,55 @@ window.confirmReset = function() {
     };
 };
 
+rollButton.addEventListener('click', () => {
+    console.log("1. Roll Button Clicked");
+
+    const isBoardDirty = boardState.some(cell => cell !== null);
+    const isTimerRunning = secondsElapsed > 0;
+
+    if (isBoardDirty || isTimerRunning) {
+        console.log("2. Game in progress, seeking modal...");
+        const modal = document.getElementById('custom-confirm-modal');
+        const confirmBtn = document.getElementById('confirm-delete');
+        const cancelBtn = document.getElementById('confirm-cancel');
+        
+        // Safety Check
+        if (!modal || !confirmBtn) {
+            console.error("3. Error: Modal elements missing from HTML!");
+            setupGame(); 
+            return;
+        }
+
+        // Update text safely
+        const title = modal.querySelector('h2');
+        const text = modal.querySelector('p');
+        if (title) title.innerText = "Start New Game?";
+        if (text) text.innerText = "This will clear your board and roll new letters.";
+        confirmBtn.innerText = "Yes, New Game";
+
+        modal.classList.remove('hidden');
+        console.log("4. Modal should be visible now");
+
+        // Use a fresh click listener
+        confirmBtn.onclick = () => {
+            console.log("5. Confirm 'Yes' Clicked");
+            modal.classList.add('hidden');
+            setupGame(); 
+        };
+        
+        cancelBtn.onclick = () => modal.classList.add('hidden');
+    } else {
+        console.log("2. Board empty, starting setupGame immediately");
+        setupGame();
+    }
+});
+
 // Initialize
-rollButton.addEventListener('click', setupGame);
+// rollButton.addEventListener('click', setupGame);
+
+
+
+
 loadDictionary();
 createBoard();
 loadStats();
@@ -450,3 +524,11 @@ window.onclick = (event) => {
         settingsModal.classList.add('hidden');
     }
 }
+
+
+//const settingsTrigger = document.getElementById('settings-trigger');
+//const settingsModal = document.getElementById('settings-modal'); // Adjust to your actual ID
+
+//settingsTrigger.onclick = () => {
+//    settingsModal.classList.remove('hidden');
+//};

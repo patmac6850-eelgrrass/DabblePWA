@@ -151,20 +151,6 @@ header h1 {
     opacity: 0.9;
 }
 
-/* --- UI Components --- */
-#victory-banner {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #4CAF50;
-    color: white;
-    padding: 12px 30px;
-    border-radius: 50px;
-    z-index: 10001;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-}
-
 #word-hud {
     position: fixed;
     top: 10px;
@@ -626,4 +612,66 @@ body {
     align-items: left;      /* Centers the content vertically */
     margin: 20px 0;           /* Adds some breathing room top and bottom */
     width: 100%;
+}
+
+#victory-banner {
+    position: fixed;
+    bottom: 0;         /* Align to the bottom of the screen */
+    left: 0;
+    width: 100%;
+    background: #4CAF50; /* Solid green for a "Win" feel */
+    padding: 15px 0;
+    z-index: 2000;
+    text-align: center;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.3); /* Shadow on top to separate from board */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#victory-banner h2 {
+    margin: 5px 0;
+    font-size: 1.5rem;
+}
+
+#victory-banner p {
+    margin: 5px 0;
+    font-size: 1.1rem;
+}
+
+#clear-button {
+    background-color: #555; /* A neutral gray */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+#clear-button:active {
+    background-color: #444; /* Darkens when tapped */
+}
+
+/* This container acts as the anchor but takes up zero vertical space */
+.top-bar {
+    position: absolute; /* Changed from relative to absolute */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    z-index: 1000;
+}
+
+.gear-icon {
+    position: absolute;
+    top: 15px;    /* Distance from the very top */
+    right: 15px;  /* Distance from the right edge */
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1; /* Prevents extra height from the emoji itself */
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
