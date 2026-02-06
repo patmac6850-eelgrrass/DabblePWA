@@ -1,13 +1,13 @@
 // Game State
-//const diceConfigs = [
-//    "MMLLBY", "VFGKPP", "HHNNRR", "DFRLLW", "RRDLGG", "XKBSZN",
-//    "WHHTTP", "AEIOUU", "CCMTTS", "OIINNY", "AEIOUU", "AAEEOO"
-//];
-
 const diceConfigs = [
     "MMLLBY", "VFGKPP", "HHNNRR", "DFRLLW", "RRDLGG", "XKBSZN",
-    "WHHTTP", "CCBTJD", "CCMTTS", "OIINNY", "AEIOUU", "AAEEOO"
+    "WHHTTP", "AEIOUU", "CCMTTS", "OIINNY", "AEIOUU", "AAEEOO"
 ];
+
+//const diceConfigs = [
+//    "MMLLBY", "VFGKPP", "HHNNRR", "DFRLLW", "RRDLGG", "XKBSZN",
+//    "WHHTTP", "CCBTJD", "CCMTTS", "OIINNY", "AEIOUU", "AAEEOO"
+//];
 
 
 
@@ -39,6 +39,10 @@ const trayElement = document.getElementById('dice-tray');
 const timerText = document.getElementById('timer');
 const rollButton = document.getElementById('roll-button');
 
+
+
+
+
 // 1. Initialize the Board
 function createBoard() {
     boardElement.innerHTML = '';
@@ -54,21 +58,26 @@ function createBoard() {
 
 const clearButton = document.getElementById('clear-button');
 
+// Change your old listener to this:
 clearButton.onclick = () => {
-    // 1. Physically move all dice elements back to the tray
+    // Only show modal if there is actually something on the board to clear
+    const isBoardDirty = boardState.some(cell => cell !== null);
+    if (isBoardDirty) {
+        openConfirmModal('clear-board');
+    }
+};
+
+// Move your actual clearing logic into its own function so we can call it:
+function executeClearBoard() {
     const allDice = document.querySelectorAll('.die');
     allDice.forEach(die => {
         trayElement.appendChild(die);
         die.style.position = 'static';
         die.classList.remove('valid');
     });
-
-    // 2. Wipe the internal board tracking array
     boardState.fill(null);
-    
-    // 3. Update the highlights (clears any remaining green cells)
     refreshHighlights();
-};
+}
 
 // Stats Logic
 function updateStatsUI() {
@@ -121,6 +130,7 @@ function setupGame() {
     if(gameBoard) gameBoard.classList.remove('ui-disabled');
     if(controls) controls.classList.remove('ui-disabled');
     document.getElementById('victory-banner').classList.add('hidden');
+    timerText.classList.remove('win-flash');
 
     const rolledDice = diceConfigs.map((config, id) => ({
         id: id,
@@ -371,7 +381,7 @@ function checkWinCondition() {
     const greenDice = document.querySelectorAll('.die.valid').length;
     const connected = isEverythingConnected(); 
 
-    if (diceOnBoard === 12 && greenDice === 12 && connected) {
+    if (diceOnBoard === 3 && greenDice === 3 && connected) {
         recordGameWon(); 
         clearInterval(timerInterval);
         timerText.classList.add('win-flash');
@@ -445,60 +455,130 @@ async function fetchDefinition(word) {
     }
 }
 
-window.confirmReset = function() {
+
+// window.confirmReset = function() {
+//     const modal = document.getElementById('custom-confirm-modal');
+//     modal.classList.remove('hidden');
+//     document.getElementById('confirm-cancel').onclick = () => modal.classList.add('hidden');
+//     document.getElementById('confirm-delete').onclick = () => {
+//         localStorage.removeItem('dabble_played');
+//         localStorage.removeItem('dabble_won');
+//         updateStatsUI();
+//         modal.classList.add('hidden');
+//     };
+// };
+
+
+
+// rollButton.addEventListener('click', () => {
+//     console.log("1. Roll Button Clicked");
+
+//     const isBoardDirty = boardState.some(cell => cell !== null);
+//     const isTimerRunning = secondsElapsed > 0;
+
+//     if (isBoardDirty || isTimerRunning) {
+//         console.log("2. Game in progress, seeking modal...");
+//         const modal = document.getElementById('custom-confirm-modal');
+//         const confirmBtn = document.getElementById('confirm-delete');
+//         const cancelBtn = document.getElementById('confirm-cancel');
+        
+//         // Safety Check
+//         if (!modal || !confirmBtn) {
+//             console.error("3. Error: Modal elements missing from HTML!");
+//             setupGame(); 
+//             return;
+//         }
+
+//         // Update text safely
+//         const title = modal.querySelector('h2');
+//         const text = modal.querySelector('p');
+//         if (title) title.innerText = "Start New Game?";
+//         if (text) text.innerText = "This will clear your board and roll new letters.";
+//         confirmBtn.innerText = "Yes, New Game";
+
+//         modal.classList.remove('hidden');
+//         console.log("4. Modal should be visible now");
+
+//         // Use a fresh click listener
+//         confirmBtn.onclick = () => {
+//             console.log("5. Confirm 'Yes' Clicked");
+//             modal.classList.add('hidden');
+//             setupGame(); 
+//         };
+        
+//         cancelBtn.onclick = () => modal.classList.add('hidden');
+//     } else {
+//         console.log("2. Board empty, starting setupGame immediately");
+//         setupGame();
+//     }
+// });
+
+// --- UNIFIED CONFIRMATION LOGIC ---
+function openConfirmModal(type) {
     const modal = document.getElementById('custom-confirm-modal');
-    modal.classList.remove('hidden');
-    document.getElementById('confirm-cancel').onclick = () => modal.classList.add('hidden');
-    document.getElementById('confirm-delete').onclick = () => {
-        localStorage.removeItem('dabble_played');
-        localStorage.removeItem('dabble_won');
-        updateStatsUI();
+    const title = modal.querySelector('h3'); // Using h3 as per your HTML
+    const message = modal.querySelector('p');
+    const confirmBtn = document.getElementById('confirm-yes-btn');
+    const cancelBtn = document.getElementById('confirm-cancel');
+
+    if (type === 'new-game') {
+        title.innerText = "Start New Game?";
+        message.innerText = "This will clear your board and roll new letters. Are you sure?";
+        confirmBtn.innerText = "Yes, New Game";
+        confirmBtn.onclick = () => {
+            modal.classList.add('hidden');
+            setupGame();
+        };
+    } 
+    // Change 'clear-button' to 'clear-board'
+    else if (type === 'clear-board') { 
+    title.innerText = "Clear Board?";
+    message.innerText = "This will move all dice back to the tray, but keep your current letters.";
+    confirmBtn.innerText = "Clear It";
+    confirmBtn.onclick = () => {
         modal.classList.add('hidden');
+        executeClearBoard(); 
     };
-};
+}
+    else if (type === 'reset-stats') {
+        title.innerText = "Reset All Stats?";
+        message.innerText = "This will permanently delete your win history and best times.";
+        confirmBtn.innerText = "Delete Everything";
+        confirmBtn.onclick = () => {
+            localStorage.removeItem('dabble_played');
+            localStorage.removeItem('dabble_won');
+            updateStatsUI();
+            modal.classList.add('hidden');
+        };
+    }
 
+    modal.classList.remove('hidden');
+    cancelBtn.onclick = () => modal.classList.add('hidden');
+}
+
+// --- BUTTON LISTENERS ---
+
+// Updated New Game logic
 rollButton.addEventListener('click', () => {
-    console.log("1. Roll Button Clicked");
-
     const isBoardDirty = boardState.some(cell => cell !== null);
     const isTimerRunning = secondsElapsed > 0;
 
     if (isBoardDirty || isTimerRunning) {
-        console.log("2. Game in progress, seeking modal...");
-        const modal = document.getElementById('custom-confirm-modal');
-        const confirmBtn = document.getElementById('confirm-delete');
-        const cancelBtn = document.getElementById('confirm-cancel');
-        
-        // Safety Check
-        if (!modal || !confirmBtn) {
-            console.error("3. Error: Modal elements missing from HTML!");
-            setupGame(); 
-            return;
-        }
-
-        // Update text safely
-        const title = modal.querySelector('h2');
-        const text = modal.querySelector('p');
-        if (title) title.innerText = "Start New Game?";
-        if (text) text.innerText = "This will clear your board and roll new letters.";
-        confirmBtn.innerText = "Yes, New Game";
-
-        modal.classList.remove('hidden');
-        console.log("4. Modal should be visible now");
-
-        // Use a fresh click listener
-        confirmBtn.onclick = () => {
-            console.log("5. Confirm 'Yes' Clicked");
-            modal.classList.add('hidden');
-            setupGame(); 
-        };
-        
-        cancelBtn.onclick = () => modal.classList.add('hidden');
+        openConfirmModal('new-game');
     } else {
-        console.log("2. Board empty, starting setupGame immediately");
         setupGame();
     }
 });
+
+// Updated Settings Reset logic
+window.confirmReset = function() {
+    openConfirmModal('reset-stats');
+};
+
+
+
+
+
 
 // Initialize
 // rollButton.addEventListener('click', setupGame);

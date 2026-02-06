@@ -113,6 +113,7 @@ header h1 {
 
 /* Die Location Logic */
 #dice-tray {
+    position: relative; /* Added: This makes the tray the "anchor" for the banner */
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(2, 1fr);
@@ -125,6 +126,7 @@ header h1 {
     max-width: 340px;
     min-height: 110px;
     box-sizing: border-box;
+    overflow: hidden; /* Keeps the banner clipped inside the tray's rounded corners */
 }
 
 #dice-tray .die {
@@ -134,6 +136,50 @@ header h1 {
     aspect-ratio: 1 / 1 !important;
     font-size: 1.2rem;
 }
+
+#victory-banner {
+    /* Remove position: absolute or fixed if they are there */
+    position: relative; 
+    
+    /* Center it and give it some breathing room */
+    margin: 20px auto; 
+    width: 90%;
+    max-width: 340px;
+    
+    /* Style it as a solid card */
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    
+    /* Ensure it behaves like a normal box */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#victory-banner.hidden {
+    display: none !important;
+}
+
+#victory-banner h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: white;
+}
+
+
+
+
+
+
+
+
+
+
 
 .cell .die {
     position: static !important;
@@ -614,26 +660,6 @@ body {
     width: 100%;
 }
 
-#victory-banner {
-    position: fixed;
-    bottom: 0;         /* Align to the bottom of the screen */
-    left: 0;
-    width: 100%;
-    background: #4CAF50; /* Solid green for a "Win" feel */
-    padding: 15px 0;
-    z-index: 2000;
-    text-align: center;
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.3); /* Shadow on top to separate from board */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-#victory-banner h2 {
-    margin: 5px 0;
-    font-size: 1.5rem;
-}
 
 #victory-banner p {
     margin: 5px 0;

@@ -31,18 +31,25 @@
             </div>
         </header>
 
-        <div id="victory-banner" class="hidden">
-            <div class="banner-content">
-                <h2>Dabble Win! <span id="final-score"></span></h2>
-            </div>
-        </div>
+        
 
         <div id="game-board"></div>
-        <div id="dice-tray"></div>
+        <div id="dice-tray">
+           
+        </div>
 
 <div class="controls" id="controls">
     <button id="roll-button">New Game</button>
     <button id="clear-button">Clear Board</button>
+    <div id="victory-banner" class="hidden">
+        <div class="banner-content">
+            <h2>Dabble Win! <span id="final-score"></span></h2>
+        </div>
+    </div>
+
+
+
+
 </div>
 
 <div id="settings-modal" class="modal hidden">
@@ -94,16 +101,16 @@
         </div>
     </div>
 
-    <div id="custom-confirm-modal" class="modal hidden">
-        <div class="modal-content">
-            <h3>Reset All Stats?</h3>
-            <p>This will permanently delete your win history and best times.</p>
-            <div class="modal-buttons">
-                <button id="confirm-cancel">Cancel</button>
-                <button id="confirm-delete">Delete Everything</button>
+        <div id="custom-confirm-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="confirm-title">Reset All Stats?</h3>
+                <p id="confirm-message">This will permanently delete your win history.</p>
+                
+                <div class="modal-buttons">
+                    <button id="confirm-cancel">Cancel</button>
+                    <button id="confirm-yes-btn">Confirm</button> </div>
             </div>
         </div>
-    </div>
 
     <script src="app.js"></script>
 </body>
