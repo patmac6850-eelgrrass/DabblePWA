@@ -9,7 +9,7 @@ const diceConfigs = [
     "WHHTTP", "CCBTJD", "CCMTTS", "OIINNY", "AEIOUU", "AAEEOO"
 ];
 
-
+const VERSION = "1.1.0";
 
 let minWordLength = localStorage.getItem('minWordLength') ? parseInt(localStorage.getItem('minWordLength')) : 2;
 
@@ -32,6 +32,7 @@ let draggedElement = null;
 let lastDiscoveredWord = "";
 let validHorizontal = new Set(); 
 let validVertical = new Set();   
+let isGameOver = false;
 
 // Elements
 const boardElement = document.getElementById('game-board');
@@ -124,11 +125,14 @@ function setupGame() {
     boardState = Array(100).fill(null);
     secondsElapsed = 0;
     clearInterval(timerInterval);
+    isGameOver = false;
 
     const gameBoard = document.getElementById('game-board');
     const controls = document.getElementById('controls');
+    const clearBtn = document.getElementById('clear-button');
     if(gameBoard) gameBoard.classList.remove('ui-disabled');
     if(controls) controls.classList.remove('ui-disabled');
+    if (clearBtn) clearBtn.classList.remove('ui-disabled');
     document.getElementById('victory-banner').classList.add('hidden');
     timerText.classList.remove('win-flash');
 
@@ -136,6 +140,10 @@ function setupGame() {
         id: id,
         letter: config[Math.floor(Math.random() * config.length)]
     }));
+
+
+
+    
 
     displayDice(rolledDice.sort(() => Math.random() - 0.5));
     recordGamePlayed();
@@ -191,6 +199,7 @@ function displayDice(dice) {
             }
         });
         dieEl.onpointerdown = (e) => {
+            if (isGameOver) return; // Prevents dragging if the game is won
             const startX = e.clientX;
             const startY = e.clientY;
             let hasMoved = false;
@@ -381,7 +390,7 @@ function checkWinCondition() {
     const greenDice = document.querySelectorAll('.die.valid').length;
     const connected = isEverythingConnected(); 
 
-    if (diceOnBoard === 3 && greenDice === 3 && connected) {
+    if (diceOnBoard === 12 && greenDice === 12 && connected) {
         recordGameWon(); 
         clearInterval(timerInterval);
         timerText.classList.add('win-flash');
@@ -391,8 +400,15 @@ function checkWinCondition() {
             scoreText.textContent = ` ${timerText.textContent}`;
             banner.classList.remove('hidden');
         }
-        document.getElementById('game-board')?.classList.add('ui-disabled');
-       // document.getElementById('controls')?.classList.add('ui-disabled');
+        //document.getElementById('game-board')?.classList.add('ui-disabled');
+
+        document.getElementById('clear-button')?.classList.add('ui-disabled');
+
+        // This tells our JS logic that the game is over
+        isGameOver = true; 
+
+        // Visually signal the win, but don't use ui-disabled here
+        document.getElementById('clear-button')?.classList.add('ui-disabled');
     }
 }
 
@@ -589,6 +605,7 @@ window.confirmReset = function() {
 loadDictionary();
 createBoard();
 loadStats();
+document.getElementById('app-version').textContent = VERSION;
 
 // Settings Modal Logic
 const settingsModal = document.getElementById('settings-modal');
@@ -612,3 +629,32 @@ window.onclick = (event) => {
 //settingsTrigger.onclick = () => {
 //    settingsModal.classList.remove('hidden');
 //};
+
+function isRollFair(roll) {
+    const counts = {};
+    roll.forEach(l => counts[l] = (counts[l] || 0) + 1);
+
+    const vowels = roll.filter(l => "AEIOU".includes(l)).length;
+    const tough = roll.filter(l => "JXZK".includes(l)).length; // Hard consonants
+    
+    // RULE 1: The "Vowel Subsidy"
+    // If we only have 2 vowels (because the 3rd die landed on Y or N), 
+    // we cannot afford more than 1 tough letter.
+    if (vowels <= 2 && tough > 1) return false;
+
+    // RULE 2: The "Triple Threat"
+    // Rolling 3 of the same consonant (e.g., three C's) makes a 12-letter board 
+    // too repetitive and difficult to connect.
+    const hasTripleConsonant = Object.entries(counts).some(([letter, count]) => {
+        return !"AEIOU".includes(letter) && count >= 3;
+    });
+    if (hasTripleConsonant) return false;
+
+    // RULE 3: The "Consonant Jam"
+    // If more than half the board (7+ letters) are "Clunky" consonants 
+    // (B, C, D, F, G, P, V, W), it's a "clunky" hand.
+    const clunky = roll.filter(l => "BCDFGPVW".includes(l)).length;
+    if (clunky > 6) return false;
+
+    return true; // The roll is approved!
+}

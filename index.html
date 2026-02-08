@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="style.css">
 
     <meta name="apple-mobile-web-app-title" content="Dabble">
-    <link rel="icon" type="image/png" href="icon_dabble.png">
-    <link rel="apple-touch-icon" href="icon_dabble.png">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
 </head>
 
 <body>
@@ -18,7 +18,20 @@
             <div class="top-bar">
                 <div id="menu-btn" class="gear-icon">⚙️</div>
             </div>
-            <h1>Dabble</h1>
+            
+            
+            <div class="logo-container">
+    <div class="dice-logo">
+        <div class="logo-die">D</div>
+        <div class="logo-die">A</div>
+        <div class="logo-die">B</div>
+        <div class="logo-die">B</div>
+        <div class="logo-die">L</div>
+        <div class="logo-die">E</div>
+    </div>
+</div>
+
+
             <div class="header-container">
                 <div id="timer">00:00</div>
                 <div id="stats">
@@ -78,7 +91,7 @@
         </div>
 
         <button id="reset-stats-btn" onclick="confirmReset()">Reset All Stats</button>
-        
+        <div class="version-info">Version <span id="app-version"></span></div>
         <br><br>
         <button id="settings-close" class="close-btn">Close</button>
     </div>
@@ -101,17 +114,17 @@
         </div>
     </div>
 
-        <div id="custom-confirm-modal" class="modal hidden">
-            <div class="modal-content">
-                <h3 id="confirm-title">Reset All Stats?</h3>
-                <p id="confirm-message">This will permanently delete your win history.</p>
-                
-                <div class="modal-buttons">
-                    <button id="confirm-cancel">Cancel</button>
-                    <button id="confirm-yes-btn">Confirm</button> </div>
+    <div id="custom-confirm-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="confirm-title">Reset All Stats?</h3>
+            <p id="confirm-message">This will permanently delete your win history.</p>
+            
+            <div class="modal-buttons">
+                <button id="confirm-cancel">Cancel</button>
+                <button id="confirm-yes-btn">Confirm</button> 
             </div>
         </div>
-
+    </div>
     <script src="app.js"></script>
 </body>
 </html>
