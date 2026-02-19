@@ -14,7 +14,7 @@ body {
     align-items: center;
     justify-content: flex-start;
     margin: 0;
-    padding: 10px;
+    padding: 5px 10px 0 10px; /* Keep side padding, but minimize top/bottom */
     box-sizing: border-box;
     overflow: hidden;
     height: 100dvh; /* Dynamic height for iPad/iPhone Safari */
@@ -25,7 +25,7 @@ body {
     user-select: none;
 }
 
-#game-container {
+#gameCOMMENT-container {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -33,7 +33,14 @@ body {
     width: 100%;
     max-width: 500px;
     align-items: center;
+    justify-content: center; /* This pulls Board, Tray, and Buttons to the middle */
 }
+
+
+
+
+
+
 
 /* --- Header & Stats --- */
 header h1 {
@@ -47,25 +54,117 @@ header h1 {
     align-items: center;
     width: 100%;
     max-width: 400px;
-    margin: 5px auto;
+    margin: 1px auto;
     font-family: sans-serif;
     font-weight: bold;
     color: white;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
-#stats {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.8rem;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 6px 12px;
-    border-radius: 20px;
+@keyframes logo-hop {
+    0%, 100% { transform: translateY(0); }
+    50% { 
+        transform: translateY(-20px) rotate(10deg); 
+        background-color: #FFD700; /* Gold */
+        color: #000;
+        box-shadow: 0 10px 20px rgba(255, 215, 0, 0.5);
+    }
 }
 
-.stat-item span { color: #fff; }
-.stat-dot { color: #4CAF50; font-weight: bold; }
+.logo-victory-hop {
+    animation: logo-hop 0.5s ease-out;
+}
+
+
+
+#stats {
+    position: relative; /* This is vital! */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 320px; /* Keeps it tight on iPhone */
+    gap: 4px;
+    padding: 10px;
+}
+
+.stats-row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Row 1 Specifics */
+#rank-display {
+    font-weight: bold;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Row 2 Specifics */
+.career-stats {
+    font-size: 0.85rem;
+    opacity: .8;
+}
+
+/* Row 3 Specifics: The Big Clock */
+.time-center {
+    justify-content: center; /* Center the timer group */
+    gap: 20px;
+    margin-top: 5px;
+}
+
+#timer {
+    font-size: 2rem; /* Adjusted for the new row layout */
+    line-height: 1;
+    font-family: 'Courier New', monospace;
+    color: #fff;
+    font-weight: bold;
+}
+
+
+.board-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: stretch; /* Stretch makes the ladder match grid height */
+    gap: 10px;
+   margin: 2px auto 0 auto !important; /* Removes bottom margin */
+    padding-bottom: 0;
+    /* Ensure the wrapper doesn't exceed the screen */
+    max-width: 95vw; 
+}
+
+
+
+#level-ladder {
+    display: flex;
+    flex-direction: column-reverse;
+    /* This is the secret: match the exact height of your game-board */
+    height: auto; 
+    width: clamp(10px, 4vw, 30px); /* Responsive width */
+    padding: 2px 0; /* Match grid padding if any */
+}
+
+.ladder-square {
+    flex: 1; /* Each square takes up 1/10th of the ladder height */
+    width: 100%;
+    margin: 1px 0; /* Adjust this to match your grid's gap */
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 600px) {
+    .ladder-square {
+        /* If 35px is too wide, try a fraction of the grid cell */
+        width: 15px; 
+        height: calc(85vh / 15); /* Scales with screen height */
+    }
+}
 
 /* --- Game Board & Cells --- */
 #game-board {
@@ -74,7 +173,7 @@ header h1 {
     grid-template-columns: repeat(10, 8vmin); 
     grid-template-rows: repeat(10, 8vmin);
     gap: 1px;
-    margin: 5px auto;
+    margin: 2px auto;
     width: fit-content;
     touch-action: none;
 }
@@ -86,6 +185,7 @@ header h1 {
 }
 
 /* --- Dice Styling --- */
+/* 1. The Master Die Style */
 .die {
     width: 7vw;
     height: 7vw;
@@ -100,10 +200,19 @@ header h1 {
     position: absolute;
     touch-action: none;
     z-index: 100;
+
+    /* 3D Effect */
     box-shadow: 0 4px 0 #bbb, 0 5px 10px rgba(0,0,0,0.3);
-    transition: transform 0.1s ease-out;
+    
+    /* Combined Transitions */
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+    
+    /* Mobile Polish */
     -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
 }
+
 
 .die.valid {
     background-color: #4CAF50 !important;
@@ -135,8 +244,8 @@ header h1 {
 }
 
 /* Die Location Logic */
+/* 1. The Tray: Grid is safest for the 6x2 layout */
 #dice-tray {
-    position: relative; /* Added: This makes the tray the "anchor" for the banner */
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(2, 1fr);
@@ -146,53 +255,159 @@ header h1 {
     border-radius: 8px;
     margin: 10px auto;
     width: 95%;
-    max-width: 340px;
+    max-width: 340px; /* Limits iPhone width */
     min-height: 110px;
     box-sizing: border-box;
-    overflow: hidden; /* Keeps the banner clipped inside the tray's rounded corners */
 }
 
-#dice-tray .die {
-    position: relative !important;
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 1 / 1 !important;
-    font-size: 1.2rem;
+/* 1. The Tray: Grid is safest for the 6x2 layout */
+#dice-tray {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 6px;
+    padding: 6px;
+    background: #444;
+    border-radius: 8px;
+    margin: 6px auto;
+    width: 95%;
+    max-width: 340px; /* Limits iPhone width */
+    min-height: 110px;
+    box-sizing: border-box;
 }
 
-#victory-banner {
-    /* Remove position: absolute or fixed if they are there */
-    position: relative; 
-    
-    /* Center it and give it some breathing room */
-    margin: 20px auto; 
-    width: 90%;
-    max-width: 340px;
-    
-    /* Style it as a solid card */
-    background-color: #4CAF50;
-    color: white;
-    padding: 15px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    
-    /* Ensure it behaves like a normal box */
+
+
+/* 2. Standardize the Slot */
+.tray-slot {
+    width: 100%;
+    aspect-ratio: 1 / 1;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed rgba(255, 255, 255, 0.1); 
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+    box-sizing: border-box;
+    overflow: hidden; /* Keeps anything from spilling out of the slot boundary */
+}
+
+
+/* This ensures the die behaves correctly when sitting inside a slot */
+.tray-slot .die {
+    position: relative !important;
+    
+    /* 90% is your preferred size; removing !important from width/height 
+       allows the animation's scale() to work more smoothly */
+    width: 90%; 
+    height: 90%;
+    
+    margin: 0 !important;
+    top: auto !important;
+    left: auto !important;
+    
+    /* DO NOT add 'transform: none' here. 
+       Leaving it out allows .die-throw to do its job! */
+       
+    /* Ensure the font size fits the slot */
+    font-size: 1rem; 
+}
+
+.controls-row {
+    display: flex;
+    /* This pushes the icons to the far left and far right edges */
+    justify-content: space-between; 
+    align-items: center;
+    padding: 10px 10px; /* Slight horizontal padding so they don't touch the glass */
+    /* ADD THESE THREE LINES */
+    width: 100%;
+    max-width: 500px;  /* This keeps it from stretching on PC */
+    margin: 0 auto;    /* This keeps the whole row centered on PC */
+
+    box-sizing: border-box;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
+}
+
+
+
+.icon-button {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0; /* Prevents them from squishing into rectangles */
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 8px;
+    display: flex;
     align-items: center;
     justify-content: center;
 }
 
-#victory-banner.hidden {
-    display: none !important;
+/* New Game - Bigger gap on its LEFT */
+.primary-button {
+    flex: 2; 
+    height: 50px;
+    margin-left: 15px; /* Creates that bigger gap between Gear and New Game */
+    white-space: nowrap;
 }
 
-#victory-banner h2 {
-    margin: 0;
-    font-size: 1.5rem;
+/* Clear - Bigger gap on its RIGHT */
+.secondary-button {
+    flex: 1.2; 
+    height: 40px;
+    margin-right: 15px; /* Creates that bigger gap between Clear and Share */
+    margin-left: 6px;   /* This is the small 1/16" gap in the dead center */
+}
+
+
+/* Active states for tactile feel */
+#roll-button:active, #clear-button:active {
+    transform: scale(0.98);
+    filter: brightness(0.9);
+}
+
+
+#rollOLD-button {
+    flex: 3; /* Takes up 3 parts of the space (approx 75%) */
+    padding: 16px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: #28a745; /* Go Green */
+    border: none;
+    border-radius: 8px;
     color: white;
 }
+
+#clearOLD-button {
+    flex: 1; /* Takes up 1 part of the space (approx 25%) */
+    padding: 16px;
+    font-size: 1rem;
+    background-color: #444; /* Neutral Grey */
+    border: none;
+    border-radius: 8px;
+    color: #ccc;
+    white-space: nowrap; /* Prevents "Clear" from wrapping */
+}
+
+
+
+.timer-action-row {
+    display: flex;
+    justify-content: space-between; /* Pushes timer left, button right */
+    align-items: flex-end; /* Aligns the bottom of the text with the button */
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+
+
+#best-time-display {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-top: 2px;
+}
+
+
 
 .logo-container {
     display: flex;
@@ -238,25 +453,50 @@ header h1 {
 }
 
 #word-hud {
-    position: fixed;
-    top: 10px;
+    position: absolute;
+    top: 45%; 
     left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 400px;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
-    border-radius: 25px;
-    padding: 10px 20px;
-    z-index: 9999;
-    transition: opacity 0.4s, transform 0.4s;
-    -webkit-tap-highlight-color: transparent;
+    transform: translate(-50%, -50%);
+    
+    width: 100%;
+    height: 34px; 
+    
+    /* MATCHING THE TRAY */
+    background: #444; 
+    border-radius: 6px; /* Matches the tray-slot/die corners */
+    border: 1px solid #555; /* Subtle edge */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Adds depth */
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: auto; /* Ensure it CAN be clicked */
+    cursor: pointer;      /* Shows the hand icon on PC */
+    user-select: none; /* Prevents text highlighting when tapping quickly */
+}
+
+/* Let's make the "Found" text pop against the grey */
+#hud-message {
+    color: #f0c040; /* Using your Gold/DABBLE color */
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.hud-content {
+    /* Tighten the font size if needed to fit the slimmer bar */
+    font-size: 0.85rem;
+    line-height: 1;
 }
 
 .hud-hidden {
     opacity: 0;
-    transform: translate(-50%, -50px) !important;
-    pointer-events: none;
+    transform: translate(-50%, -30%) scale(0.7) !important;
+    
+    /* This ensures it doesn't block the stats when hidden */
+    pointer-events: none; 
 }
 
 /* --- Modals --- */
@@ -277,10 +517,16 @@ header h1 {
     background: #222;
     padding: 25px;
     border-radius: 15px;
-    border: 2px solid #4CAF50;
     text-align: center;
+    
+    /* Use the Green border and the Green glow together */
+    border: 2px solid #4CAF50;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
+    
+    /* Positioning */
     max-width: 300px;
-    width: 80%;
+    width: 85%; /* Helps it look consistent on different iPhones */
+    margin: 0 auto;
 }
 
 /* --- Buttons & Controls --- */
@@ -300,6 +546,12 @@ header h1 {
     border-radius: 8px;
     font-size: 1.1rem;
     font-weight: bold;
+}
+
+#roll-button.ui-disabled {
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+    transition: all 0.3s ease;
 }
 
 #reset-stats-btn {
@@ -354,39 +606,6 @@ header h1 {
     touch-action: none;
 }
 
-#word-hud {
-    cursor: pointer; /* Changes the mouse to a hand icon */
-    user-select: none; /* Prevents text highlighting when tapping quickly */
-}
-
-#word-hud:active {
-    transform: translateX(-50%) scale(0.98); /* Slight "squish" effect when tapped */
-}
-
-#word-hud {
-    position: fixed;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 400px;
-    background: rgba(0, 0, 0, 0.7); /* Semi-transparent */
-    backdrop-filter: blur(5px); /* Frosty glass effect */
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 25px;
-    padding: 10px 20px;
-    z-index: 9999;
-    transition: opacity 0.4s, transform 0.4s;
-    pointer-events: auto; /* Allow clicking the toast itself */
-    
-}
-
-.hud-hidden {
-    opacity: 0;
-    transform: translate(-50%, -50px) !important;
-    pointer-events: none;
-}
-
 .hud-content {
     color: white;
     display: flex;
@@ -424,49 +643,11 @@ header h1 {
 }
 
 
-/* 2. The 3D Die Base Style */
-.die {
-    width: 7vw;
-    height: 7vw;
-    background-color: white;
-    color: #333;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 5vw;
-    border-radius: 6px; /* Slightly rounder for a die feel */
-    position: absolute;
-    touch-action: none;
-    z-index: 100;
-
-    /* 3D Effect for iPhone & Desktop */
-    box-shadow: 
-        0 4px 0 #bbb,                /* The bottom "thickness" edge */
-        0 5px 10px rgba(0,0,0,0.3);  /* The shadow on the table/board */
-    
-    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
-    -webkit-tap-highlight-color: transparent; /* Fix for iPhone blue flash */
-    user-select: none;
-}   /* background: rgba(0, 0, 0, 0.2); */
 
 
 
-/* 1. The Tray: Grid is safest for the 6x2 layout */
-#dice-tray {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 8px;
-    padding: 12px;
-    background: #444;
-    border-radius: 8px;
-    margin: 10px auto;
-    width: 95%;
-    max-width: 340px; /* Limits iPhone width */
-    min-height: 110px;
-    box-sizing: border-box;
-}
+
+
 
 /* 2. The Die in the Tray: Square and Relative */
 #dice-tray .die {
@@ -532,25 +713,23 @@ header h1 {
 
 
 .win-flash {
-    animation: glow 1s infinite alternate;
-    color: #4CAF50;
-    font-weight: bold;
+    animation: victoryPulse 1s infinite alternate;
+    color: #4CAF50 !important;
 }
 
-@keyframes glow {
-    from { text-shadow: 0 0 5px #fff, 0 0 10px #4CAF50; }
-    to { text-shadow: 0 0 10px #fff, 0 0 20px #4CAF50; }
+@keyframes victoryPulse {
+    from { 
+        text-shadow: 0 0 5px #fff, 0 0 10px #4CAF50;
+        transform: scale(1);
+    }
+    to { 
+        text-shadow: 0 0 15px #fff, 0 0 30px #4CAF50;
+        transform: scale(1.1); /* The big timer actually grows on win */
+    }
 }
 
 
-.modal-content {
-    background: #333;
-    padding: 30px;
-    border-radius: 10px;
-    text-align: center;
-    border: 2px solid #4CAF50;
-    box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
-}
+
 
 .hidden { display: none !important; }
 
@@ -596,7 +775,7 @@ header h1 {
     user-select: none;
 }
 
-body {
+bodyOLD {
     /* Prevents the 'elastic' bounce effect at the top/bottom of the page */
     overflow: hidden;
     position: fixed;
@@ -618,14 +797,7 @@ body {
     z-index: 10000;
 }
 
-.modal-content {
-    background: #222;
-    padding: 25px;
-    border-radius: 15px;
-    border: 2px solid #444;
-    text-align: center;
-    max-width: 300px;
-}
+
 
 .modal-buttons {
     display: flex;
@@ -700,12 +872,6 @@ body {
     width: 100%;
 }
 
-
-#victory-banner p {
-    margin: 5px 0;
-    font-size: 1.1rem;
-}
-
 #clear-button {
     background-color: #555; /* A neutral gray */
     color: white;
@@ -760,4 +926,82 @@ body {
     text-align: center;
     border-top: 1px solid #333;
     padding-top: 10px;
+}
+
+/* --- Dice Throw Animation --- */
+
+@keyframes diceThrow {
+    0% { 
+        transform: scale(2) rotate(30deg); /* Start large/zoomed in */
+        opacity: 0; 
+        filter: blur(8px); /* Motion blur effect */
+    }
+    15% {
+        opacity: 1; /* Pop into view quickly */
+    }
+    40% { 
+        transform: scale(0.7) rotate(-15deg); /* Slight squash when hitting 'table' */
+    }
+    100% { 
+        transform: scale(1) rotate(0deg); 
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+.die-throw {
+    /* Critical: This keeps dice invisible during the random delay period */
+    opacity: 0; 
+    
+    /* forwards: keeps the die visible and at scale(1) after animation ends */
+    animation: diceThrow 0.4s ease-out forwards; 
+}
+
+.switch {
+    position: relative;
+    display: flex; /* Changed to flex for better alignment */
+    align-items: center;
+    gap: 12px; /* Space between the slider and the text */
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: white;
+    margin-bottom: 15px;
+}
+
+/* Ensure the slider box stays the same size */
+.switch .slider {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    background-color: #555;
+    transition: .4s;
+    border-radius: 20px;
+    flex-shrink: 0; /* Prevents the slider from squishing */
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+input:checked + .slider { background-color: #4CAF50; }
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px; width: 14px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider:before { transform: translateX(20px); }
+
+@keyframes winPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); filter: brightness(1.2); }
+    100% { transform: scale(1); }
+}
+
+.win-animation {
+    animation: winPulse 0.5s ease-in-out;
 }

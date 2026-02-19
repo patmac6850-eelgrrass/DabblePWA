@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Dabble PWA</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-title" content="Dabble">
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
@@ -16,54 +18,74 @@
     <div id="game-container">
         <header>
             <div class="top-bar">
-                <div id="menu-btn" class="gear-icon">⚙️</div>
+               
             </div>
             
             
             <div class="logo-container">
-    <div class="dice-logo">
-        <div class="logo-die">D</div>
-        <div class="logo-die">A</div>
-        <div class="logo-die">B</div>
-        <div class="logo-die">B</div>
-        <div class="logo-die">L</div>
-        <div class="logo-die">E</div>
-    </div>
-</div>
-
+                <div class="dice-logo">
+                    <div class="logo-die">D</div>
+                    <div class="logo-die">A</div>
+                    <div class="logo-die">B</div>
+                    <div class="logo-die">B</div>
+                    <div class="logo-die">L</div>
+                    <div class="logo-die">E</div>
+                </div>
+            </div>
 
             <div class="header-container">
-                <div id="timer">00:00</div>
+
                 <div id="stats">
-                    <span class="stat-item">PLAYED <span id="games-played">0</span></span>
-                    <span class="stat-dot">&bull;</span>
-                    <span class="stat-item">WON <span id="games-won">0</span></span>
-                    <span class="stat-dot">&bull;</span>
-                    <span class="stat-item"><span id="win-percent">0</span>% WIN</span>
+
+                    <div id="word-hud" class="hud-hidden">
+                        <div class="hud-content" style="color: #FFD700; font-weight: bold;">
+                            <span class="hud-icon">ⓘ</span>
+                            <span id="hud-message">Word Found: PLAY</span>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <span id="rank-display">BRONZE</span>
+                        <span class="standard-stat">Level: <span id="streak-count">0</span>/10</span>
+                    </div>
+                    
+                    <div class="stats-row">
+                        <span class="standard-stat">Wins: <span id="games-won">0</span></span>
+                        <span class="standard-stat">Played: <span id="games-played">0</span></span>
+                        <span class="standard-stat" id="win-pct">0%</span>
+                    </div>
+
+                    <div class="stats-row">
+                        <span id="timer">00:00</span>
+                        <span class="standard-stat">Best: <span id="best-time-display">--:--</span></span>
+                    </div>
                 </div>
+
+
             </div>
         </header>
 
-        
 
+
+    <div class="board-wrapper">
+        <div id="level-ladder" class="level-ladder"></div>
         <div id="game-board"></div>
-        <div id="dice-tray">
-           
-        </div>
-
-<div class="controls" id="controls">
-    <button id="roll-button">New Game</button>
-    <button id="clear-button">Clear Board</button>
-    <div id="victory-banner" class="hidden">
-        <div class="banner-content">
-            <h2>Dabble Win! <span id="final-score"></span></h2>
-        </div>
+        <div id="progress-ladder" class="ladder"></div> </div>
     </div>
+    <div id="dice-tray"></div>
 
 
 
+<div class="controls-row">
+    <button id="menu-btn" class="icon-button">⚙️</button>
+    <button id="roll-button" class="primary-button">New Game</button>
+    <button id="clear-button" class="secondary-button">Clear</button>
+    <button id="share-button" class="icon-button">🔗</button>
+</div>
 
 </div>
+
+
+
 
 <div id="settings-modal" class="modal hidden">
     <div class="modal-content">
@@ -73,11 +95,13 @@
         <div class="rules-box">
             <h3>How to Play</h3>
             <p>1. Arrange all 12 dice on the board.</p>
-            <p>2. Words must be 2+ letters (unless 3-min is on).</p>
+            <p>2. Words must be 2+ letters unless 3-min is on. 3-min is classic Dabble. </p>
             <p>3. All words must be connected in one cluster.</p>
             <p>4. Green dice indicate a valid dictionary word.</p>
             <p>5. Click on a green word for the definition.</p>
-
+            <p>6. Sound Effects may be enable/disabled.</p> 
+            <p>7. NEW. Your level (0-10) will increase, +1, for each win and decrease with each loss.  You will lose, -1, for each letter that is not green when the game ends; max -3</p>
+            <p>8. NEW. Share button shares the Dabble link including your letters for another player to play your letters. </p>
         </div>
 
         <hr class="def-divider">
@@ -88,6 +112,11 @@
                 <span class="slider"></span>
                 3-Letter Minimum
             </label>
+            <label class="switch">
+                <input type="checkbox" id="sound-toggle" checked>
+                <span class="slider"></span>
+                Sound Effects
+            </label>
         </div>
 
         <button id="reset-stats-btn" onclick="confirmReset()">Reset All Stats</button>
@@ -96,13 +125,6 @@
         <button id="settings-close" class="close-btn">Close</button>
     </div>
 </div>
-
-        <div id="word-hud" class="hud-hidden">
-            <div class="hud-content">
-                <span class="hud-icon">ⓘ</span>
-                <span id="hud-message">Word Found: PLAY</span>
-            </div>
-        </div>
 
         <div id="def-modal" class="modal hidden">
             <div class="modal-content">
@@ -125,6 +147,9 @@
             </div>
         </div>
     </div>
+
     <script src="app.js"></script>
+    <audio id="roll-sound" src="dice-roll.mp3" preload="auto" playsinline></audio>
+    <audio id="win-sound" src="Success-ding.mp3" preload="auto" playsinline></audio>
 </body>
 </html>
