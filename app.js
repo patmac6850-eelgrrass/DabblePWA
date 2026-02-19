@@ -17,7 +17,7 @@ const diceConfigs = [
 
 
 
-const VERSION = "1.2.6";
+const VERSION = "1.2.7";
 const IS_DEBUG = false;
 
 let minWordLength = localStorage.getItem('minWordLength') ? parseInt(localStorage.getItem('minWordLength')) : 2;
