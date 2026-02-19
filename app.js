@@ -246,6 +246,8 @@ function loadStats() {
     updateStatsUI();
 }
 
+
+
 async function loadDictionary() {
     dictionary.clear();
     try {
@@ -269,7 +271,11 @@ async function loadDictionary() {
         console.error("Could not load dictionary:", err);
     }
 }
+
+
+
 function setupGame() {
+
     // 1. IMMEDIATELY hide the banner and reset its state
     const banner = document.getElementById('victory-banner');
     if (banner) {
@@ -278,21 +284,23 @@ function setupGame() {
         banner.style.display = 'none';      // Force hide override
     }
 
-if (soundEnabled) {
-    const winSound = document.getElementById('win-sound');
-    if (winSound) {
-        winSound.volume = 0; // Keep it muted just in case
-        
-        // We play it, but immediately tell it to stop after 100ms
-        winSound.play().then(() => {
-            setTimeout(() => {
-                winSound.pause();
-                winSound.currentTime = 0;
-                winSound.volume = 0.4; // Ready for the real win
-            }, 1); 
-        }).catch(e => console.log("Priming waiting for first tap"));
-    }
-}
+
+    if (soundEnabled) {
+        const winSound = document.getElementById('win-sound');
+        if (winSound) {
+            winSound.volume = 0; // Keep it muted just in case
+            
+            // We play it, but immediately tell it to stop after 100ms
+            winSound.play().then(() => {
+                setTimeout(() => {
+                    winSound.pause();
+                    winSound.currentTime = 0;
+                    winSound.volume = 0.4; // Ready for the real win
+                    }, 1); 
+                }).catch(e => console.log("Priming waiting for first tap"));
+            }
+        }
+
 
 
     if (isRolling) return; // Exit if already rolling
@@ -329,9 +337,12 @@ if (soundEnabled) {
     }
 
 
-window.debugModeActive = true;
+
+
+
 
 // --- INTEGRATED DEBUG LOGIC ---
+
     rolledDice = getStartingDice();
     console.log("Rolled Dice:", rolledDice.map(d => d.letter).join(', '));
 
@@ -360,7 +371,7 @@ window.debugModeActive = true;
         }, 500);
     
     window.debugModeActive = false; 
-}
+    }
 
 
     // Lockout timer (Your existing code continues...)
@@ -378,7 +389,9 @@ window.debugModeActive = true;
     startTimer();
 }
 
+  
 function getStartingDice() {
+   
     // 1. Check for URL Challenge (?q=...)
     const urlParams = new URLSearchParams(window.location.search);
     const challengeCode = urlParams.get('q');
@@ -386,11 +399,13 @@ function getStartingDice() {
     if (challengeCode) {
         try {
             // Decode Base64 string back into letters
-            const decoded = atob(challengeCode); 
+            const decoded = atob(challengeCode.padEnd(challengeCode.length + (4 - challengeCode.length % 4) % 4, '='));
+            //const decoded = atob(challengeCode); 
             const letters = decoded.split('');
             if (letters.length === 12) {
+ 
                 // Clean the URL so refreshing doesn't keep reloading the challenge
-                window.history.replaceState({}, document.title, window.location.pathname);
+                //window.history.replaceState({}, document.title, window.location.pathname);
                 return letters.map((l, id) => ({ id: id, letter: l.toUpperCase() }));
             }
         } catch (e) {
@@ -920,9 +935,26 @@ window.confirmReset = function() {
 
 
 loadDictionary();
+
 createBoard();
+
 loadStats();
+
 document.getElementById('app-version').textContent = VERSION;
+
+// --- The Invitation Logic ---
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('q')) {
+    // You can use a standard alert or a custom modal if you have one
+    alert("You've been challenged! Click 'New Game' to play these shared letters.");
+}
+
+// ONLY auto-start if there is a challenge in the URL
+//const urlParams = new URLSearchParams(window.location.search);
+//if (urlParams.has('q')) {
+//    console.log("Challenge detected! Starting game automatically...");
+//    setupGame();
+//}
 
 
 
@@ -1135,3 +1167,4 @@ const shareBtn = document.getElementById('share-button');
 if (shareBtn) {
     shareBtn.addEventListener('click', handleShare);
 }
+
