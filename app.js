@@ -14,10 +14,19 @@ const diceConfigs = [
 //    "WHHTTP", "CCBTJD", "CCMTTS", "OIINNY", "AEIOUU", "AAEEOO"
 //];
 
+// --- Game State & Variants ---
+const GAME_TYPES = {
+    CLASSIC: 'classic',
+    SPEED_RUN: 'speedRun',
+    PROGRESSIVE: 'progressive'
+};
+
+let currentGameType = GAME_TYPES.CLASSIC; // Default start
+let currentLevel = 0;                     // Tracks 1-10 in Speed/Progressive
+let totalLevels = 10;                     // Goal for the variants
 
 
-
-const VERSION = "1.2.7";
+const VERSION = "1.2.8";
 const IS_DEBUG = false;
 
 let minWordLength = localStorage.getItem('minWordLength') ? parseInt(localStorage.getItem('minWordLength')) : 2;
@@ -405,7 +414,7 @@ function getStartingDice() {
             if (letters.length === 12) {
  
                 // Clean the URL so refreshing doesn't keep reloading the challenge
-                //window.history.replaceState({}, document.title, window.location.pathname);
+                window.history.replaceState({}, document.title, window.location.pathname);
                 return letters.map((l, id) => ({ id: id, letter: l.toUpperCase() }));
             }
         } catch (e) {
@@ -614,9 +623,9 @@ function startTimer() {
             clearInterval(timerInterval);
             timerText.textContent = "99:59";
         }
-        const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
-        const secs = (secondsElapsed % 60).toString().padStart(2, '0');
-        timerText.textContent = `  ${mins}:${secs}`;
+       //const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+       //const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+       //timerText.textContent = `  ${mins}:${secs}`;
     }, 1000);
 }
 
@@ -728,6 +737,7 @@ function checkWinCondition() {
                     }, 20);
                 }
             }
+
 
             // 1. Fire the actual scoring logic
             recordGameWon(); 
